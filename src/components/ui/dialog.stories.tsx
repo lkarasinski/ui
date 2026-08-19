@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Check, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { Button } from "./button";
+import { Button, useButtonFeedback } from "./button";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./dialog";
 import { Input } from "./input";
 
@@ -48,7 +48,7 @@ function AsyncRenameDialog({ shouldFail }: { shouldFail: boolean }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("Acme Inc.");
   const [state, setState] = useState<SaveState>({ status: "idle" });
-  const [showSuccess, setShowSuccess] = useState(false);
+  const feedback = useButtonFeedback();
   const pending = state.status === "pending";
 
   const handleOpenChange = (next: boolean) => {
@@ -65,66 +65,62 @@ function AsyncRenameDialog({ shouldFail }: { shouldFail: boolean }) {
     try {
       await mockSaveRequest(shouldFail);
       setOpen(false);
-      setShowSuccess(true);
+      feedback.confirm(
+        <>
+          <Check size={14} />
+          Saved
+        </>,
+      );
     } catch (error) {
       setState({ status: "error", message: error instanceof Error ? error.message : "Something went wrong." });
     }
   };
 
   return (
-    <Button.Confirmation
-      show={showSuccess}
-      onDismiss={() => setShowSuccess(false)}
-      message={
-        <>
-          <Check size={14} />
-          Saved
-        </>
-      }
-    >
-      <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <Button.Root feedback={feedback}>
         <DialogTrigger asChild>
-          <Button variant="outline">Rename workspace</Button>
+          <Button.Trigger variant="outline">Rename workspace</Button.Trigger>
         </DialogTrigger>
-        <DialogContent
-          onEscapeKeyDown={(event) => pending && event.preventDefault()}
-          onInteractOutside={(event) => pending && event.preventDefault()}
-        >
-          <DialogHeader closeDisabled={pending}>
-            <DialogTitle>Rename workspace</DialogTitle>
-          </DialogHeader>
-          <label htmlFor="workspace-name" className="flex flex-col gap-1.5 text-sm text-muted-foreground">
-            Workspace name
-            <Input
-              id="workspace-name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              disabled={pending}
-            />
-          </label>
-          {state.status === "error" && <p className="mt-2 text-sm text-destructive-foreground">{state.message}</p>}
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline" className="w-auto min-h-8 px-3" disabled={pending}>
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button
-              className="w-auto min-h-8 px-3"
-              onClick={handleSave}
-              disabled={pending || name.trim().length === 0}
-            >
-              {pending && (
-                <Button.Icon key="spinner">
-                  <Loader2 className="animate-spin" />
-                </Button.Icon>
-              )}
-              {pending ? "Saving…" : "Save"}
+      </Button.Root>
+      <DialogContent
+        onEscapeKeyDown={(event) => pending && event.preventDefault()}
+        onInteractOutside={(event) => pending && event.preventDefault()}
+      >
+        <DialogHeader closeDisabled={pending}>
+          <DialogTitle>Rename workspace</DialogTitle>
+        </DialogHeader>
+        <label htmlFor="workspace-name" className="flex flex-col gap-1.5 text-sm text-muted-foreground">
+          Workspace name
+          <Input
+            id="workspace-name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            disabled={pending}
+          />
+        </label>
+        {state.status === "error" && <p className="mt-2 text-sm text-destructive-foreground">{state.message}</p>}
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline" className="w-auto min-h-8 px-3" disabled={pending}>
+              Cancel
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </Button.Confirmation>
+          </DialogClose>
+          <Button
+            className="w-auto min-h-8 px-3"
+            onClick={handleSave}
+            disabled={pending || name.trim().length === 0}
+          >
+            {pending && (
+              <Button.Icon key="spinner">
+                <Loader2 className="animate-spin" />
+              </Button.Icon>
+            )}
+            {pending ? "Saving…" : "Save"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
