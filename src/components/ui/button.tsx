@@ -149,18 +149,18 @@ function ButtonRoot({ feedback, children }: ButtonRootProps) {
 Button.Root = ButtonRoot;
 Button.Trigger = Button;
 
-/** An animated 16px icon slot for the start or end of a button label. */
+/** An animated 14px icon slot for the start or end of a button label. */
 function ButtonIcon({ children }: { children: ReactNode }) {
   const variant = useButtonVariant();
   return (
     <motion.span
       layout
       initial={{ width: 0, opacity: 0 }}
-      animate={{ width: 16, opacity: 1 }}
+      animate={{ width: 14, opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}
       transition={{ type: "tween", duration: 0.15, ease: "linear" }}
       data-variant={variant}
-      className="inline-flex shrink-0 items-center justify-center overflow-hidden [&_svg]:size-4"
+      className="inline-flex shrink-0 items-center justify-center overflow-hidden [&_svg]:size-3.5"
     >
       {children}
     </motion.span>
