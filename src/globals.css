@@ -1,0 +1,69 @@
+@import "tailwindcss";
+@import "@fontsource-variable/manrope";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+
+@theme {
+  --font-sans: "Manrope Variable", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --text-sm: 13px;
+  --text-sm--line-height: 1.4;
+
+  --color-background: #f4f0e8;
+  --color-foreground: #24201d;
+
+  --color-card: #fdfbf6;
+  --color-card-foreground: #342d28;
+
+  --color-border: #d7d0c4;
+  --color-input: #cfc6ba;
+  --color-ring: #a14c2f;
+
+  --color-muted: #f1ece3;
+  --color-muted-foreground: #6d655e;
+
+  --color-primary: #a14c2f;
+  --color-primary-hover: #b45a32;
+  --color-primary-active: #8f4329;
+  --color-primary-foreground: #fffaf5;
+
+  --color-secondary: #faf6ef;
+  --color-secondary-hover: #f1ece3;
+  --color-secondary-foreground: #342d28;
+
+  --color-destructive: #b6553c;
+  --color-destructive-foreground: #a24832;
+
+  --color-success: #3d8a51;
+  --color-success-foreground: #307243;
+
+  --color-warning: #b66f22;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+}
+
+:root {
+  color: var(--color-foreground);
+  background: var(--color-background);
+  font-family: var(--font-sans);
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
