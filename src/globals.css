@@ -45,6 +45,35 @@
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 14px;
+
+  --animate-dialog-overlay-in: dialog-overlay-in 55ms ease-out;
+  --animate-dialog-overlay-out: dialog-overlay-out 45ms ease-in;
+  --animate-dialog-content-in: dialog-content-in 55ms ease-out;
+  --animate-dialog-content-out: dialog-content-out 45ms ease-in;
+}
+
+@keyframes dialog-overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-overlay-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-content-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-content-out {
+  to {
+    opacity: 0;
+  }
 }
 
 :root {
@@ -63,7 +92,9 @@ body {
   margin: 0;
 }
 
-button,
-input {
-  font: inherit;
+@layer base {
+  button,
+  input {
+    font: inherit;
+  }
 }

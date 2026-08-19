@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion, type HTMLMotionProps } from "framer-motion";
-import { Children, Fragment, isValidElement, type ReactNode } from "react";
+import { Children, Fragment, isValidElement, useEffect, type ReactNode } from "react";
 import { createContext, useContextSelector } from "use-context-selector";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +40,7 @@ export function Button({ className, variant, children, ...props }: ButtonProps) 
 
   return (
     <ButtonContext.Provider value={{ variant }}>
-      <motion.button layout transition={{ type: "spring", stiffness: 500, damping: 34 }} className={cn(buttonVariants({ variant }), className)} {...props}>
+      <motion.button layout transition={{ type: "tween", duration: 0.15, ease: "linear" }} className={cn(buttonVariants({ variant }), className)} {...props}>
         <AnimatePresence initial={false} mode="popLayout">
           {items}
         </AnimatePresence>
@@ -55,9 +55,9 @@ function ButtonIcon({ children }: { children: ReactNode }) {
     <motion.span
       layout
       initial={{ width: 0, opacity: 0 }}
-      animate={{ width: "auto", opacity: 1 }}
+      animate={{ width: 16, opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}
-      transition={{ type: "spring", stiffness: 500, damping: 34 }}
+      transition={{ type: "tween", duration: 0.15, ease: "linear" }}
       data-variant={variant}
       className="inline-flex shrink-0 items-center justify-center overflow-hidden [&_svg]:size-4"
     >
@@ -67,3 +67,40 @@ function ButtonIcon({ children }: { children: ReactNode }) {
 }
 
 Button.Icon = ButtonIcon;
+
+type ButtonConfirmationProps = {
+  show: boolean;
+  onDismiss?: () => void;
+  duration?: number;
+  message: ReactNode;
+  children: ReactNode;
+};
+
+function ButtonConfirmation({ show, onDismiss, duration = 3000, message, children }: ButtonConfirmationProps) {
+  useEffect(() => {
+    if (!show || !onDismiss) return;
+    const timeout = setTimeout(onDismiss, duration);
+    return () => clearTimeout(timeout);
+  }, [show, duration, onDismiss]);
+
+  return (
+    <div className="relative inline-block">
+      {children}
+      <AnimatePresence>
+        {show && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "linear" }}
+            className="absolute bottom-full left-1/2 mb-2 flex -translate-x-1/2 items-center gap-1.5 text-nowrap rounded-md border border-border bg-card px-3 py-1.5 text-sm text-success-foreground shadow-[0_4px_12px_rgb(61_46_31_/_15%)]"
+          >
+            {message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+Button.Confirmation = ButtonConfirmation;

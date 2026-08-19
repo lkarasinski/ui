@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { ArrowRight, Download, Loader2 } from "lucide-react";
+import { ArrowRight, Check, Download, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./button";
 
@@ -52,6 +52,28 @@ export const IconAppearing: Story = {
         )}
         {loading ? "Saving…" : "Save"}
       </Button>
+    );
+  },
+};
+
+export const Confirmation: Story = {
+  render: function Render() {
+    const [show, setShow] = useState(false);
+    return (
+      <Button.Confirmation
+        show={show}
+        onDismiss={() => setShow(false)}
+        message={
+          <>
+            <Check size={14} />
+            Saved
+          </>
+        }
+      >
+        <Button variant="outline" onClick={() => setShow(true)}>
+          Save
+        </Button>
+      </Button.Confirmation>
     );
   },
 };
