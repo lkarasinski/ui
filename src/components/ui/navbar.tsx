@@ -4,12 +4,13 @@ import { useId, useMemo, useState, type ComponentProps, type ReactNode } from "r
 import { createContext, useContextSelector } from "use-context-selector";
 import { cn } from "@/lib/utils";
 
-export type NavbarVariant = "default" | "command" | "compact";
+export type NavbarVariant = "default" | "command" | "compact" | "inset";
 
 type NavbarContextValue = {
   activeKey: string;
   indicatorId: string;
   onActiveKeyChange?: (key: string) => void;
+  showBrand: boolean;
   variant: NavbarVariant;
 };
 
@@ -23,10 +24,12 @@ type NavbarRootProps = ComponentProps<"header"> & {
   activeKey?: string;
   defaultActiveKey?: string;
   onActiveKeyChange?: (key: string) => void;
+  /** Set to false when another surface — an inset sidebar, usually — carries the logo. */
+  showBrand?: boolean;
   variant?: NavbarVariant;
 };
 
-export function NavbarRoot({ activeKey, defaultActiveKey = "overview", onActiveKeyChange, variant = "default", className, children, ...props }: NavbarRootProps) {
+export function NavbarRoot({ activeKey, defaultActiveKey = "overview", onActiveKeyChange, showBrand = true, variant = "default", className, children, ...props }: NavbarRootProps) {
   const [uncontrolledActiveKey, setUncontrolledActiveKey] = useState(defaultActiveKey);
   const indicatorId = useId();
   const currentActiveKey = activeKey ?? uncontrolledActiveKey;
@@ -40,17 +43,26 @@ export function NavbarRoot({ activeKey, defaultActiveKey = "overview", onActiveK
         if (!isControlled) setUncontrolledActiveKey(key);
         onActiveKeyChange?.(key);
       },
+      showBrand,
       variant,
     }),
-    [currentActiveKey, indicatorId, isControlled, onActiveKeyChange, variant],
+    [currentActiveKey, indicatorId, isControlled, onActiveKeyChange, showBrand, variant],
   );
 
   return (
     <NavbarStateContext.Provider value={contextValue}>
       <header
         {...props}
+        data-variant={variant}
         style={{ height, minHeight: height, maxHeight: height, ...props.style }}
-        className={cn("w-full overflow-hidden border-b border-border bg-card text-card-foreground", className)}
+        className={cn(
+          "overflow-hidden bg-card text-card-foreground",
+          // Floating bar: carries its own gutter and elevation, so it needs no wrapper padding.
+          variant === "inset"
+            ? "m-2 rounded-lg border border-border shadow-[0_1px_2px_rgb(80_55_35_/_8%),0_10px_24px_rgb(61_46_31_/_8%)]"
+            : "w-full border-b border-border",
+          className,
+        )}
       >
         {children}
       </header>
@@ -58,7 +70,11 @@ export function NavbarRoot({ activeKey, defaultActiveKey = "overview", onActiveK
   );
 }
 
+/** The logo block. It renders nothing when the navbar is set to `showBrand={false}`. */
 export function NavbarBrand({ name = "Fieldnotes", eyebrow = "Workspace", className, children, ...props }: ComponentProps<"a"> & { name?: string; eyebrow?: string }) {
+  const showBrand = useNavbar((context) => context.showBrand) ?? true;
+  if (!showBrand) return null;
+
   return (
     <a href="#" className={cn("group inline-flex shrink-0 items-center gap-2.5 outline-none focus-visible:ring-3 focus-visible:ring-primary/25", className)} {...props}>
       {children ?? <span aria-hidden="true" className="relative grid size-8 place-items-center rounded-[9px] bg-foreground text-card">
@@ -74,8 +90,9 @@ export function NavbarBrand({ name = "Fieldnotes", eyebrow = "Workspace", classN
   );
 }
 
-export function NavbarNav({ children, className }: { children: ReactNode; className?: string }) {
-  return <nav aria-label="Primary navigation" className={cn("flex items-stretch gap-1", className)}>{children}</nav>;
+/** A group of items. Pass `aria-label` when a navbar holds more than one group. */
+export function NavbarNav({ children, className, ...props }: ComponentProps<"nav">) {
+  return <nav aria-label="Primary navigation" className={cn("flex items-stretch gap-1", className)} {...props}>{children}</nav>;
 }
 
 export function NavbarItem({ itemKey, icon: Icon, children, className, ...props }: ComponentProps<"button"> & { itemKey: string; icon?: LucideIcon }) {
@@ -95,20 +112,24 @@ export function NavbarItem({ itemKey, icon: Icon, children, className, ...props 
         "relative inline-flex min-h-10 items-center gap-2 px-2.5 text-[12px] font-semibold text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-primary/25",
         active && "text-foreground",
         variant === "compact" && "min-h-9 px-2 text-[11px]",
+        variant === "inset" && "min-h-9 rounded-md hover:bg-muted",
         className,
       )}
       {...props}
     >
-      {Icon && <Icon aria-hidden="true" className="size-3.5" strokeWidth={1.8} />}
-      {children}
       {active && (
         <motion.span
           layoutId={`${indicatorId}-active-tab`}
           aria-hidden="true"
           transition={reduceMotion ? { duration: 0 } : { type: "tween", duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute inset-x-2 bottom-[-1px] h-px bg-primary"
+          // A floating bar has no edge to underline, so the active item takes a filled pill instead.
+          className={cn(variant === "inset" ? "absolute inset-0 rounded-md bg-secondary" : "absolute inset-x-2 bottom-[-1px] h-px bg-primary")}
         />
       )}
+      <span className="relative inline-flex items-center gap-2">
+        {Icon && <Icon aria-hidden="true" className="size-3.5" strokeWidth={1.8} />}
+        {children}
+      </span>
     </button>
   );
 }

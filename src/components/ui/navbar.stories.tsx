@@ -9,13 +9,14 @@ const meta: Meta<typeof Navbar> = {
     layout: "fullscreen",
     docs: {
       description: {
-        component: "A composable application navbar. Assemble Brand, Nav, Search, Actions, and Profile slots to fit the surface instead of configuring a large prop matrix.",
+        component: "A composable application navbar. Assemble Brand, Nav, Search, Actions, and Profile slots to fit the surface instead of configuring a large prop matrix.\n\n`variant` sets the chrome: `default` and `compact` are flush bars with a bottom border, `command` adds a second row, and `inset` floats the bar on its own gutter to match `<Sidebar variant=\"inset\" />`. `showBrand={false}` drops the logo when another surface carries it.",
       },
     },
   },
   argTypes: {
-    variant: { control: "select", options: ["default", "command", "compact"] },
+    variant: { control: "select", options: ["default", "command", "compact", "inset"] },
     activeKey: { control: "text" },
+    showBrand: { control: "boolean" },
   },
 };
 
@@ -114,5 +115,58 @@ export const ProjectContext: Story = {
         </Navbar.Actions>
       </div>
     </Navbar>
+  ),
+};
+
+export const Inset: Story = {
+  args: { variant: "inset", defaultActiveKey: "projects" },
+  parameters: {
+    docs: { description: { story: "The inset variant: a floating bar with its own gutter, radius, and elevation, matching `<Sidebar variant=\"inset\" />`. It carries the spacing itself, so the layout around it needs no wrapper padding. A floating bar has no edge to underline, so the active tab takes a filled pill instead of the hairline." } },
+  },
+  render: (args) => (
+    <div className="min-h-screen bg-background">
+      <Navbar {...args}>
+        <div className="flex h-full items-center gap-4 px-3">
+          <Navbar.Brand name="Northstar" eyebrow="Workspace" />
+          <Navbar.Nav>
+            <Navbar.Item itemKey="projects">Projects</Navbar.Item>
+            <Navbar.Item itemKey="activity">Activity</Navbar.Item>
+            <Navbar.Item itemKey="people">People</Navbar.Item>
+          </Navbar.Nav>
+          <Navbar.Actions>
+            <Navbar.Search className="max-lg:hidden" />
+            <Navbar.IconButton label="Settings" icon={Settings2} />
+            <Navbar.Profile />
+          </Navbar.Actions>
+        </div>
+      </Navbar>
+      <div className="px-2 py-4 text-sm text-muted-foreground md:px-4 md:py-8">The floating bar brings its own gutter and elevation, so the page beneath it needs no wrapper padding.</div>
+    </div>
+  ),
+};
+
+export const InsetWithoutBrand: Story = {
+  args: { variant: "inset", defaultActiveKey: "projects", showBrand: false },
+  parameters: {
+    docs: { description: { story: "`showBrand={false}` drops the logo from the navbar without changing the composition, for shells where an inset sidebar already carries it. `Sidebar` takes the same prop, so one value in your code decides which surface shows the logo." } },
+  },
+  render: (args) => (
+    <div className="min-h-screen bg-background">
+      <Navbar {...args}>
+        <div className="flex h-full items-center gap-4 px-3">
+          <Navbar.Brand name="Northstar" eyebrow="Workspace" />
+          <Navbar.Nav>
+            <Navbar.Item itemKey="projects">Projects</Navbar.Item>
+            <Navbar.Item itemKey="activity">Activity</Navbar.Item>
+            <Navbar.Item itemKey="people">People</Navbar.Item>
+          </Navbar.Nav>
+          <Navbar.Actions>
+            <Navbar.Search className="max-lg:hidden" />
+            <Navbar.IconButton label="Settings" icon={Settings2} />
+            <Navbar.Profile />
+          </Navbar.Actions>
+        </div>
+      </Navbar>
+    </div>
   ),
 };
