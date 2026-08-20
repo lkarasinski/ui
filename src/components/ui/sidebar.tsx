@@ -114,7 +114,8 @@ export function SidebarRoot({
 /** The top slot of the rail, for a workspace switcher or another control. */
 export function SidebarHeader({ children, className, ...props }: ComponentProps<"div">) {
   // The padding does not change with the rail, so the mark keeps its position while the rail narrows.
-  return <div className={cn("flex min-h-16 items-center gap-2 border-b border-border px-3.5", className)} {...props}>{children}</div>;
+  // It is 4px tighter than the nav's so the 32px mark centres on the same column as the 16px icons.
+  return <div className={cn("flex min-h-16 items-center gap-2 border-b border-border px-2.5", className)} {...props}>{children}</div>;
 }
 
 /**
@@ -139,9 +140,15 @@ export function SidebarWorkspace({ name = "Northstar", detail = "Workspace", cla
   );
 }
 
-/** The scrollable navigation region between header and footer. */
+/**
+ * The scrollable navigation region between header and footer.
+ *
+ * The x axis is clipped rather than left to compute to `auto` alongside
+ * `overflow-y`, which would give the list a horizontal scrollbar for the frames
+ * where the collapsing rail is a sub-pixel narrower than an icon tile needs.
+ */
 export function SidebarNav({ children, className, ...props }: ComponentProps<"nav">) {
-  return <nav aria-label="Sidebar navigation" className={cn("min-h-0 flex-1 overflow-y-auto px-2.5 py-4", className)} {...props}>{children}</nav>;
+  return <nav aria-label="Sidebar navigation" className={cn("min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 py-4", className)} {...props}>{children}</nav>;
 }
 
 /** Groups related items with spacing below them. */
@@ -202,7 +209,7 @@ export function SidebarDivider({ className, ...props }: ComponentProps<"div">) {
 
 /** The bottom slot of the rail, for settings or a primary action. */
 export function SidebarFooter({ children, className, ...props }: ComponentProps<"div">) {
-  return <div className={cn("border-t border-border p-2.5", className)} {...props}>{children}</div>;
+  return <div className={cn("border-t border-border p-3", className)} {...props}>{children}</div>;
 }
 
 /**

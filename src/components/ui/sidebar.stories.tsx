@@ -68,9 +68,10 @@ want to change before adding a variant; a variant is for the rail chrome changin
 \`\`\`
 
 Collapsed mode narrows the rail from 240px to 60px, keeps icon targets available, and visually hides labels
-without removing them from the accessibility tree. Nothing moves sideways on the way: icons keep the left
-gutter they have at full width and the tile narrows around them, and 60px is that gutter, a 40px tile, and
-the gutter again — so a left-aligned icon lands centred without ever sliding there. \`Sidebar.Toggle\` sits on
+without removing them from the accessibility tree. Nothing moves sideways on the way. Every mark and icon
+centres on the same column 30px from the rail's left edge — the header pads 4px tighter than the nav so the
+32px workspace mark lands on it too — and 60px is twice that, so the column that is left-aligned at full
+width is the centred one when collapsed, without anything sliding to get there. \`Sidebar.Toggle\` sits on
 the rail's outer edge instead of inside a slot, so it stays reachable at both widths without spending a row —
 at 60px there is none to spare.
 
