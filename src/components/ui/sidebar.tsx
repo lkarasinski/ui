@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, ChevronsLeft, ChevronsRight, type LucideIcon } from "lucide-react";
 import { useMemo, useState, type ComponentProps, type ReactNode } from "react";
 import { createContext, useContextSelector } from "use-context-selector";
@@ -156,10 +157,33 @@ export function SidebarSection({ children, className, ...props }: ComponentProps
   return <div className={cn("mb-5 last:mb-0", className)} {...props}>{children}</div>;
 }
 
-/** A group heading. It is visually hidden while collapsed but stays readable to assistive tech. */
+/**
+ * A group heading. It is visually hidden while collapsed but stays readable to
+ * assistive tech, since clipping it to no height leaves it in the tree.
+ *
+ * Rather than dropping out of flow and letting the group below snap up, the row
+ * keeps the height of its text and gives it up over the same 200ms and the same
+ * curve as the rail's width, so the icons ride up with the contraction.
+ */
 export function SidebarSectionLabel({ children, className, ...props }: ComponentProps<"div">) {
   const collapsed = useSidebar((context) => context.collapsed);
-  return <div className={cn("mb-1.5 px-2 font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-muted-foreground", collapsed && visuallyHidden, className)} {...props}>{children}</div>;
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      initial={false}
+      animate={{ height: collapsed ? 0 : "auto", opacity: collapsed ? 0 : 1 }}
+      transition={
+        reduceMotion
+          ? { duration: 0 }
+          : // `ease` is the curve `transition-[width]` runs on, so the two stay in step.
+            { height: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }, opacity: { duration: 0.12 } }
+      }
+      className="overflow-hidden"
+    >
+      <div className={cn("mb-1.5 px-2 font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-muted-foreground", className)} {...props}>{children}</div>
+    </motion.div>
+  );
 }
 
 /**

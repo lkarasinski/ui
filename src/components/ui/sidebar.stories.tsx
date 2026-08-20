@@ -71,7 +71,9 @@ Collapsed mode narrows the rail from 240px to 60px, keeps icon targets available
 without removing them from the accessibility tree. Nothing moves sideways on the way. Every mark and icon
 centres on the same column 30px from the rail's left edge — the header pads 4px tighter than the nav so the
 32px workspace mark lands on it too — and 60px is twice that, so the column that is left-aligned at full
-width is the centred one when collapsed, without anything sliding to get there. \`Sidebar.Toggle\` sits on
+width is the centred one when collapsed, without anything sliding to get there. Group headings give up their
+height over the same 200ms and the same curve, so the icons below them ride up with the contraction instead of
+snapping into place ahead of it. \`Sidebar.Toggle\` sits on
 the rail's outer edge instead of inside a slot, so it stays reachable at both widths without spending a row —
 at 60px there is none to spare.
 
