@@ -83,6 +83,13 @@ With a full-width navbar above the body that is the navbar; in the docked arrang
 In a \`page\` shell, dock the rail (header inside \`AppShell.Column\`) as \`PageScroll\` does. With a full-width
 header above the body, the sticky header and the pinned rail both want the top of the viewport and overlap.
 
+The two modes also differ at the end of the scroll. An \`app\` shell keeps the macOS overscroll bounce inside
+\`AppShell.Main\` — it is the scroller and it sets \`overscroll-behavior-y: contain\`, so the navbar and the rail
+hold still while the content rubber-bands. A \`page\` shell hands the scroll to the document, so the bounce is
+the document's and the sticky chrome rides along with it; nothing inside the shell can hold it back. Pick
+\`app\` when that matters, or take the bounce away from the document with \`html { overscroll-behavior-y: none }\`
+and accept that the content stops bouncing too.
+
 #### Responsive
 
 The sidebar is the consumer's call: hide it below \`md\` with a class and offer the drawer composition from the
@@ -152,18 +159,26 @@ function WorkspaceSidebar({ showBrand = false, variant }: { showBrand?: boolean;
 function WorkspaceNavbar({ showBrand = true, variant }: { showBrand?: boolean; variant?: "default" | "compact" | "inset" }) {
   return (
     <Navbar defaultActiveKey="projects" showBrand={showBrand} variant={variant}>
-      <div className="flex h-full items-center gap-5 px-5">
-        <Navbar.Brand name="Northstar" eyebrow="Workspace" />
-        <Navbar.Nav>
+      <Navbar.Row className="sm:gap-5">
+        <Navbar.MenuTrigger />
+        <Navbar.Brand name="Northstar" />
+        <Navbar.Nav className="hidden md:flex">
           <Navbar.Item itemKey="projects">Projects</Navbar.Item>
           <Navbar.Item itemKey="activity">Activity</Navbar.Item>
         </Navbar.Nav>
         <Navbar.Actions>
-          <Navbar.Search />
+          <Navbar.Search className="hidden md:flex" />
           <Navbar.IconButton label="Notifications" icon={Bell} />
           <Navbar.Profile />
         </Navbar.Actions>
-      </div>
+      </Navbar.Row>
+      <Navbar.Menu title="Northstar">
+        <Navbar.Search className="max-w-none" />
+        <Navbar.Nav presentation="menu">
+          <Navbar.Item itemKey="projects">Projects</Navbar.Item>
+          <Navbar.Item itemKey="activity">Activity</Navbar.Item>
+        </Navbar.Nav>
+      </Navbar.Menu>
     </Navbar>
   );
 }
@@ -171,8 +186,7 @@ function WorkspaceNavbar({ showBrand = true, variant }: { showBrand?: boolean; v
 function Page({ title, lead, blocks = 3 }: { title: string; lead: string; blocks?: number }) {
   return (
     <>
-      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">Workspace overview</p>
-      <h1 className="mt-3 text-2xl font-bold tracking-[-0.04em] text-foreground">{title}</h1>
+      <h1 className="text-2xl font-bold tracking-[-0.04em] text-foreground">{title}</h1>
       <p className="mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{lead}</p>
       <div className="mt-8 grid gap-3 sm:grid-cols-3">
         {Array.from({ length: blocks }, (_, index) => (
@@ -279,8 +293,7 @@ export const WithDetailPanel: Story = {
         </AppShell.Main>
         <AppShell.Aside label="Item details">
           <div className="border-b border-border px-4 py-3.5">
-            <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Details</p>
-            <p className="mt-1.5 text-[13px] font-bold tracking-[-0.02em] text-foreground">Onboarding revamp</p>
+            <p className="text-[13px] font-bold tracking-[-0.02em] text-foreground">Onboarding revamp</p>
           </div>
           <dl className="grid gap-3 px-4 py-4 text-xs">
             <div className="flex items-center justify-between gap-3"><dt className="text-muted-foreground">Owner</dt><dd className="font-medium text-foreground">Marta Nowak</dd></div>
@@ -309,9 +322,9 @@ export const WithStatusBar: Story = {
         </AppShell.Main>
       </AppShell.Body>
       <AppShell.Footer>
-        <span className="inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.12em]"><span aria-hidden="true" className="size-1.5 rounded-full bg-success" />Connected</span>
-        <span className="font-mono text-[9px] uppercase tracking-[0.12em]">Last sync 09:41</span>
-        <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.12em]">6 running · 2 queued</span>
+        <span className="inline-flex items-center gap-1.5 text-[9px] uppercase tracking-[0.12em]"><span aria-hidden="true" className="size-1.5 rounded-full bg-success" />Connected</span>
+        <span className="text-[9px] uppercase tracking-[0.12em]">Last sync 09:41</span>
+        <span className="ml-auto text-[9px] uppercase tracking-[0.12em]">6 running · 2 queued</span>
       </AppShell.Footer>
     </AppShell>
   ),
@@ -330,8 +343,7 @@ export const PageScroll: Story = {
           <AppShell.Header><WorkspaceNavbar showBrand={false} /></AppShell.Header>
           <AppShell.Main>
             <AppShell.Content width="narrow">
-              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">Changelog</p>
-              <h1 className="mt-3 text-2xl font-bold tracking-[-0.04em] text-foreground">What shipped this month</h1>
+              <h1 className="text-2xl font-bold tracking-[-0.04em] text-foreground">What shipped this month</h1>
               {Array.from({ length: 12 }, (_, index) => (
                 <p key={index} className="mt-4 text-sm leading-6 text-muted-foreground">
                   A narrow measure keeps long-form reading comfortable while the rail stays available. The shell grows with the content instead of trapping it in a scroll container, so find-in-page and anchor links behave the way a reader expects.
@@ -355,8 +367,7 @@ export const FocusedContent: Story = {
       <AppShell.Body>
         <AppShell.Main>
           <AppShell.Content width="narrow">
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">Settings</p>
-            <h1 className="mt-3 text-2xl font-bold tracking-[-0.04em] text-foreground">Workspace preferences</h1>
+            <h1 className="text-2xl font-bold tracking-[-0.04em] text-foreground">Workspace preferences</h1>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">Without a sidebar the content carries the page, so keep the measure narrow and the actions close to what they change.</p>
             <div className="mt-8 grid gap-3">
               <div className="h-20 rounded-lg border border-border bg-card" />

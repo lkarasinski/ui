@@ -21,11 +21,10 @@ active-item and collapsed state; every block below it only renders its own surfa
 <Sidebar defaultActiveKey="home">
   <Sidebar.Toggle />
   <Sidebar.Header>
-    <Sidebar.Workspace name="Northstar" detail="Workspace" />
+    <Sidebar.Workspace name="Northstar" />
   </Sidebar.Header>
   <Sidebar.Nav>
     <Sidebar.Section>
-      <Sidebar.SectionLabel>Workspace</Sidebar.SectionLabel>
       <Sidebar.Item itemKey="home" icon={Home}>Home</Sidebar.Item>
       <Sidebar.Item itemKey="inbox" icon={Inbox} end={<Sidebar.Badge>8</Sidebar.Badge>}>Inbox</Sidebar.Item>
     </Sidebar.Section>
@@ -182,7 +181,7 @@ export const WorkspaceNavigation: Story = {
         <Sidebar.Nav><Navigation /></Sidebar.Nav>
       </Sidebar>
       <Content>
-        <div className="mx-auto max-w-4xl p-6 md:p-10"><p className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">Workspace overview</p><h1 className="mt-3 text-2xl font-bold tracking-[-0.04em] text-foreground">Good morning, Marta</h1><p className="mt-2 max-w-lg text-sm leading-6 text-muted-foreground">A quiet place for projects, conversations, and the work that needs your attention.</p><div className="mt-8 grid gap-3 sm:grid-cols-3"><div className="h-28 rounded-lg border border-border bg-card" /><div className="h-28 rounded-lg border border-border bg-card" /><div className="h-28 rounded-lg border border-border bg-card" /></div></div>
+        <div className="mx-auto max-w-4xl p-6 md:p-10"><h1 className="text-2xl font-bold tracking-[-0.04em] text-foreground">Good morning, Marta</h1><p className="mt-2 max-w-lg text-sm leading-6 text-muted-foreground">A quiet place for projects, conversations, and the work that needs your attention.</p><div className="mt-8 grid gap-3 sm:grid-cols-3"><div className="h-28 rounded-lg border border-border bg-card" /><div className="h-28 rounded-lg border border-border bg-card" /><div className="h-28 rounded-lg border border-border bg-card" /></div></div>
       </Content>
     </Layout>
   ),

@@ -43,14 +43,16 @@ const appShellMainVariants = cva("flex min-h-0 min-w-0 flex-1 flex-col", {
       inset: "m-2 rounded-lg border border-border bg-card shadow-[0_1px_2px_rgb(80_55_35_/_8%),0_10px_24px_rgb(61_46_31_/_8%)]",
     },
     scroll: {
-      app: "overflow-y-auto",
+      // `contain` keeps the overscroll bounce inside the content and stops it chaining
+      // out to the shell, so the navbar and the rail never ride along with it.
+      app: "overflow-y-auto overscroll-y-contain",
       page: "",
     },
   },
   defaultVariants: { variant: "flush", scroll: "app" },
 });
 
-const appShellAsideVariants = cva("hidden w-[320px] shrink-0 flex-col overflow-y-auto lg:flex", {
+const appShellAsideVariants = cva("hidden w-[320px] shrink-0 flex-col overflow-y-auto overscroll-y-contain lg:flex", {
   variants: {
     variant: {
       flush: "border-l border-border bg-card",
@@ -158,6 +160,10 @@ export function AppShellColumn({ className, children, ...props }: ComponentProps
 /**
  * The main content surface. It scrolls on its own in an `app` shell and grows
  * with the document in a `page` shell.
+ *
+ * Only the `app` shell can bounce the content alone: a `page` shell hands the
+ * scroll to the document, so the overscroll is the document's and the sticky
+ * chrome moves with it.
  */
 export function AppShellMain({ className, children, ...props }: ComponentProps<"main">) {
   const scroll = useAppShell((context) => context.scroll);

@@ -128,7 +128,7 @@ export function SidebarHeader({ children, className, ...props }: ComponentProps<
  * A workspace switcher that keeps only its mark when the rail is collapsed.
  * It renders nothing when the sidebar is set to `showBrand={false}`.
  */
-export function SidebarWorkspace({ name = "Northstar", detail = "Workspace", className }: { name?: string; detail?: string; className?: string }) {
+export function SidebarWorkspace({ name = "Northstar", className }: { name?: string; className?: string }) {
   const collapsed = useSidebar((context) => context.collapsed);
   const showBrand = useSidebar((context) => context.showBrand) ?? true;
   if (!showBrand) return null;
@@ -140,7 +140,7 @@ export function SidebarWorkspace({ name = "Northstar", detail = "Workspace", cla
         <span className="absolute h-1 w-3.5 -translate-y-1 rounded-full bg-card" />
         <span className="absolute h-1 w-2.5 translate-y-1 rounded-full bg-card" />
       </span>
-      {!collapsed && <span className="min-w-0 leading-none"><span className="block truncate text-[12px] font-bold tracking-[-0.02em] text-foreground">{name}</span><span className="mt-1 block truncate font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">{detail}</span></span>}
+      {!collapsed && <span className="min-w-0 truncate text-[12px] font-bold tracking-[-0.02em] text-foreground">{name}</span>}
       {!collapsed && <ChevronDown aria-hidden="true" className="ml-auto size-3.5 shrink-0 text-muted-foreground" />}
     </button>
   );
@@ -154,7 +154,7 @@ export function SidebarWorkspace({ name = "Northstar", detail = "Workspace", cla
  * where the collapsing rail is a sub-pixel narrower than an icon tile needs.
  */
 export function SidebarNav({ children, className, ...props }: ComponentProps<"nav">) {
-  return <nav aria-label="Sidebar navigation" className={cn("min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 py-4", className)} {...props}>{children}</nav>;
+  return <nav aria-label="Sidebar navigation" className={cn("min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain px-3 py-4", className)} {...props}>{children}</nav>;
 }
 
 /** Groups related items with spacing below them. */
@@ -181,12 +181,11 @@ export function SidebarSectionLabel({ children, className, ...props }: Component
       transition={
         reduceMotion
           ? { duration: 0 }
-          : // `ease` is the curve `transition-[width]` runs on, so the two stay in step.
-            { height: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }, opacity: { duration: 0.12 } }
+          : { height: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }, opacity: { duration: 0.12 } }
       }
       className="overflow-hidden"
     >
-      <div className={cn("mb-1.5 px-2 font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-muted-foreground", className)} {...props}>{children}</div>
+      <div className={cn("mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground", className)} {...props}>{children}</div>
     </motion.div>
   );
 }
