@@ -77,6 +77,9 @@ snapping into place ahead of it. \`Sidebar.Toggle\` sits on
 the rail's outer edge instead of inside a slot, so it stays reachable at both widths without spending a row —
 at 60px there is none to spare.
 
+The active mark is one shared indicator for the whole rail. It slides between items, including items in
+different sections or the footer, and respects reduced-motion preferences.
+
 #### Layout
 
 The sidebar is a flex child that stretches to the height of its row. Give it a parent with a definite height

@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { motion, useReducedMotion } from "framer-motion";
+import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, ChevronsLeft, ChevronsRight, type LucideIcon } from "lucide-react";
-import { useMemo, useState, type ComponentProps, type ReactNode } from "react";
+import { useId, useMemo, useState, type ComponentProps, type ReactNode } from "react";
 import { createContext, useContextSelector } from "use-context-selector";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +31,7 @@ const visuallyHidden = "absolute h-px w-px overflow-hidden whitespace-nowrap bor
 type SidebarContextValue = {
   activeKey: string;
   collapsed: boolean;
+  indicatorId: string;
   onActiveKeyChange?: (key: string) => void;
   onCollapsedChange?: (collapsed: boolean) => void;
   showBrand: boolean;
@@ -77,6 +78,7 @@ export function SidebarRoot({
 }: SidebarRootProps) {
   const [uncontrolledActiveKey, setUncontrolledActiveKey] = useState(defaultActiveKey);
   const [uncontrolledCollapsed, setUncontrolledCollapsed] = useState(defaultCollapsed);
+  const indicatorId = useId();
   const currentActiveKey = activeKey ?? uncontrolledActiveKey;
   const currentCollapsed = collapsed ?? uncontrolledCollapsed;
   const isActiveControlled = activeKey !== undefined;
@@ -85,6 +87,7 @@ export function SidebarRoot({
     () => ({
       activeKey: currentActiveKey,
       collapsed: currentCollapsed,
+      indicatorId,
       onActiveKeyChange: (key) => {
         if (!isActiveControlled) setUncontrolledActiveKey(key);
         onActiveKeyChange?.(key);
@@ -95,19 +98,21 @@ export function SidebarRoot({
       },
       showBrand,
     }),
-    [currentActiveKey, currentCollapsed, isActiveControlled, isCollapsedControlled, onActiveKeyChange, onCollapsedChange, showBrand],
+    [currentActiveKey, currentCollapsed, indicatorId, isActiveControlled, isCollapsedControlled, onActiveKeyChange, onCollapsedChange, showBrand],
   );
 
   return (
     <SidebarStateContext.Provider value={contextValue}>
-      <aside
-        {...props}
-        data-collapsed={currentCollapsed}
-        data-variant={variant}
-        className={cn(sidebarVariants({ variant, collapsed: currentCollapsed }), className)}
-      >
-        {children}
-      </aside>
+      <LayoutGroup id={indicatorId}>
+        <aside
+          {...props}
+          data-collapsed={currentCollapsed}
+          data-variant={variant}
+          className={cn(sidebarVariants({ variant, collapsed: currentCollapsed }), className)}
+        >
+          {children}
+        </aside>
+      </LayoutGroup>
     </SidebarStateContext.Provider>
   );
 }
@@ -197,7 +202,9 @@ export function SidebarSectionLabel({ children, className, ...props }: Component
 export function SidebarItem({ itemKey, icon: Icon, end, children, className, ...props }: ComponentProps<"button"> & { end?: ReactNode; icon?: LucideIcon; itemKey: string }) {
   const activeKey = useSidebar((context) => context.activeKey);
   const collapsed = useSidebar((context) => context.collapsed);
+  const indicatorId = useSidebar((context) => context.indicatorId);
   const onActiveKeyChange = useSidebar((context) => context.onActiveKeyChange);
+  const reduceMotion = useReducedMotion();
   const active = activeKey === itemKey;
 
   return (
@@ -206,14 +213,20 @@ export function SidebarItem({ itemKey, icon: Icon, end, children, className, ...
       aria-current={active ? "page" : undefined}
       onClick={() => onActiveKeyChange?.(itemKey)}
       className={cn(
-        // Overflow is clipped so a label or badge that comes back on expand cannot spill past the narrow rail.
-        "group relative flex min-h-10 w-full items-center gap-2.5 overflow-hidden rounded-md px-2.5 text-left text-xs font-semibold text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-primary/25",
+        "group relative flex min-h-10 w-full items-center gap-2.5 rounded-md px-2.5 text-left text-xs font-semibold text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-primary/25",
         active && "bg-secondary text-foreground",
         className,
       )}
       {...props}
     >
-      {active && <span aria-hidden="true" className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-primary" />}
+      {active && (
+        <motion.span
+          layoutId={`${indicatorId}-active-item`}
+          aria-hidden="true"
+          transition={reduceMotion ? { duration: 0 } : { type: "tween", duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          className="pointer-events-none absolute inset-y-2 left-0 z-10 w-0.5 rounded-full bg-primary"
+        />
+      )}
       {Icon && <Icon aria-hidden="true" className={cn("size-4 shrink-0", active ? "text-primary" : "text-muted-foreground")} strokeWidth={1.8} />}
       <span className={cn("min-w-0 flex-1 truncate", collapsed && visuallyHidden)}>{children}</span>
       {!collapsed && end}
