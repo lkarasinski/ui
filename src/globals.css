@@ -40,6 +40,7 @@
   --color-success-foreground: #307243;
 
   --color-warning: #b66f22;
+  --color-warning-foreground: #8a5116;
 
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -52,6 +53,8 @@
   --animate-dialog-content-out: dialog-content-out 45ms ease-in;
   --animate-navbar-menu-in: navbar-menu-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
   --animate-navbar-menu-out: navbar-menu-out 140ms ease-in;
+  --animate-skeleton-sheen: skeleton-sheen 1.6s ease-in-out infinite;
+  --animate-progress-indeterminate: progress-indeterminate 1.2s ease-in-out infinite;
 }
 
 @keyframes dialog-overlay-in {
@@ -87,6 +90,26 @@
 @keyframes navbar-menu-out {
   to {
     transform: translateX(-100%);
+  }
+}
+
+@keyframes skeleton-sheen {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes progress-indeterminate {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(250%);
   }
 }
 
