@@ -110,6 +110,23 @@
       "dependencies": ["class-variance-authority", "lucide-react", "use-context-selector"]
     },
     {
+      "name": "command",
+      "type": "registry:ui",
+      "title": "Command",
+      "description": "Command palette built on cmdk with grouped results, keyboard hints and an animated overlay.",
+      "files": [
+        { "path": "src/components/ui/command.tsx", "type": "registry:ui" }
+      ],
+      "registryDependencies": ["kbd", "progress", "skeleton"],
+      "dependencies": [
+        "@radix-ui/react-dialog",
+        "class-variance-authority",
+        "cmdk",
+        "lucide-react",
+        "use-context-selector"
+      ]
+    },
+    {
       "name": "dialog",
       "type": "registry:ui",
       "title": "Dialog",
@@ -138,6 +155,16 @@
         { "path": "src/components/ui/input-otp.tsx", "type": "registry:ui" }
       ],
       "dependencies": ["input-otp"]
+    },
+    {
+      "name": "kbd",
+      "type": "registry:ui",
+      "title": "Kbd",
+      "description": "Keyboard key chip with platform-aware modifier glyphs.",
+      "files": [
+        { "path": "src/components/ui/kbd.tsx", "type": "registry:ui" }
+      ],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "navbar",
