@@ -53,6 +53,10 @@
   --animate-dialog-content-out: dialog-content-out 45ms ease-in;
   --animate-navbar-menu-in: navbar-menu-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
   --animate-navbar-menu-out: navbar-menu-out 140ms ease-in;
+  --animate-command-content-in: command-content-in 70ms cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-command-content-out: command-content-out 50ms ease-in;
+  --animate-command-page-in: command-page-in 130ms cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-command-page-back-in: command-page-back-in 130ms cubic-bezier(0.22, 1, 0.36, 1);
   --animate-skeleton-sheen: skeleton-sheen 1.6s ease-in-out infinite;
   --animate-progress-indeterminate: progress-indeterminate 1.2s ease-in-out infinite;
 }
@@ -78,6 +82,46 @@
 @keyframes dialog-content-out {
   to {
     opacity: 0;
+  }
+}
+
+/* The palette is centred on X only, so the keyframes have to carry that translate. */
+@keyframes command-content-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -6px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+@keyframes command-content-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, -3px) scale(0.99);
+  }
+}
+
+/* Pushing into a sub-page moves forward, popping moves back. */
+@keyframes command-page-in {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+}
+
+@keyframes command-page-back-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
   }
 }
 
