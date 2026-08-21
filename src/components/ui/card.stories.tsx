@@ -40,6 +40,10 @@ full-bleed table or chart without a wrapper fighting the container.
 Every slot is optional and reorderable. \`Card.Divider\` and \`Card.Media\` are full-bleed, so they line up
 with the header seam instead of the body padding.
 
+The card clips its children to its own radius, which is what keeps a header background or a full-bleed
+table from covering the rounded border. The trade-off: content that has to escape the card — a
+non-portalled popover, for example — will be clipped.
+
 For a card that is itself a click target, use \`Card.Button\` — it renders a real button, so keyboard
 activation and focus come from the platform. For a navigation card, apply
 \`cardVariants({ interactive: true })\` to an anchor.
@@ -227,7 +231,7 @@ export const WithMedia: Story = {
       </Card.Header>
     </Card>
   ),
-  parameters: { docs: { description: { story: "`Card.Media` is full-bleed and rounds itself when it is the first or last slot, so charts and covers need no wrapper." } } },
+  parameters: { docs: { description: { story: "`Card.Media` is full-bleed. The card clips its children to its own radius, so a cover or chart at either end needs no wrapper and no radius of its own." } } },
 };
 
 export const Sections: Story = {

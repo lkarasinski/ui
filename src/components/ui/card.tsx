@@ -2,7 +2,10 @@ import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
-export const cardVariants = cva("flex min-w-0 flex-col rounded-lg border text-card-foreground", {
+// `overflow-hidden` is load-bearing: the header, media, and any full-bleed row paint
+// right up to the border, and without it their square corners cover the rounded edge.
+// Clipping here also means a slot never has to restate the card's radius.
+export const cardVariants = cva("flex min-w-0 flex-col overflow-hidden rounded-lg border text-card-foreground", {
   variants: {
     variant: {
       // The default surface: a sheet of paper lifted just off the background.
@@ -99,9 +102,9 @@ export function CardDivider({ className, ...props }: ComponentProps<"div">) {
   return <div role="separator" className={cn("h-px shrink-0 bg-border", className)} {...props} />;
 }
 
-/** A full-bleed media slot for a preview, chart, or cover image. */
+/** A full-bleed media slot for a preview, chart, or cover image. The card clips it to its own radius. */
 export function CardMedia({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cn("overflow-hidden border-b border-border bg-muted first:rounded-t-[11px] last:rounded-b-[11px] last:border-b-0", className)} {...props} />;
+  return <div className={cn("border-b border-border bg-muted last:border-b-0", className)} {...props} />;
 }
 
 CardRoot.Button = CardButton;
