@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion, type HTMLMotionProps } from "framer-motion";
 import { useActor } from "@xstate/react";
 import { assign, createMachine } from "xstate";
-import { Children, Fragment, isValidElement, useCallback, useMemo, type ReactNode } from "react";
+import { Children, isValidElement, useCallback, useMemo, type ReactNode } from "react";
 import { createContext, useContextSelector } from "use-context-selector";
 import { cn } from "@/lib/utils";
 
@@ -103,9 +103,15 @@ export type ButtonFeedback = ReturnType<typeof useButtonFeedback>;
  */
 export function Button({ className, variant, children, ...props }: ButtonProps) {
   // AnimatePresence only tracks ReactElements; plain text children need a keyed wrapper
-  // so they keep rendering instead of being silently dropped.
+  // so they keep rendering instead of being silently dropped. The wrapper is a real
+  // element, not a Fragment: popLayout mode attaches a measuring ref to each child,
+  // and refs cannot be passed to a Fragment.
   const items = Children.map(children, (child, index) =>
-    isValidElement(child) ? child : <Fragment key={`text-${index}`}>{child}</Fragment>,
+    isValidElement(child) ? child : (
+      <span key={`text-${index}`} className="contents">
+        {child}
+      </span>
+    ),
   );
 
   return (
