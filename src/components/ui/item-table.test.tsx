@@ -1,8 +1,9 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { createRef } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ItemTable } from "./item-table";
-import type { ItemGroup } from "./item-table";
+import { clampScroll, ItemTable } from "./item-table";
+import type { ItemGroup, ItemTableHandle } from "./item-table";
 
 const NOW = Date.now();
 
@@ -97,6 +98,81 @@ describe("ItemTable", () => {
     expect(screen.getAllByTestId("item-table-row")[2]).toHaveAttribute("data-focused");
   });
 
+  it("jumps to the first and last row with Home and End", () => {
+    renderTable();
+
+    const table = screen.getByRole("listbox");
+    fireEvent.keyDown(table, { key: "End" });
+    expect(screen.getAllByTestId("item-table-row")[2]).toHaveAttribute("data-focused");
+
+    fireEvent.keyDown(table, { key: "Home" });
+    expect(screen.getAllByTestId("item-table-row")[0]).toHaveAttribute("data-focused");
+  });
+
+  it("marks the initially selected row as active", () => {
+    renderTable({ initialSelectedId: "201" });
+
+    const rows = screen.getAllByTestId("item-table-row");
+    expect(rows[2]).toHaveAttribute("aria-selected", "true");
+    expect(rows[2]).toHaveAttribute("data-focused");
+    expect(rows[0]).toHaveAttribute("aria-selected", "false");
+  });
+
+  it("selects on click and moves the active row there", () => {
+    const onSelect = vi.fn();
+    renderTable({ onSelect });
+
+    fireEvent.click(screen.getAllByTestId("item-table-row")[1]);
+
+    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "102" }));
+    const rows = screen.getAllByTestId("item-table-row");
+    expect(rows[1]).toHaveAttribute("data-focused");
+    expect(rows[1]).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("does not select while moving in confirm mode, only on Enter", () => {
+    const onSelect = vi.fn();
+    renderTable({ onSelect });
+
+    const table = screen.getByRole("listbox");
+    fireEvent.keyDown(table, { key: "j" });
+    fireEvent.keyDown(table, { key: "j" });
+
+    expect(onSelect).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(table, { key: "Enter" });
+    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "201" }));
+  });
+
+  it("commits the selection on every step in instant mode", () => {
+    const onSelect = vi.fn();
+    renderTable({ onSelect, selectMode: "instant" });
+
+    const table = screen.getByRole("listbox");
+    fireEvent.keyDown(table, { key: "j" });
+    fireEvent.keyDown(table, { key: "j" });
+
+    expect(onSelect).toHaveBeenCalledTimes(2);
+    expect(onSelect).toHaveBeenLastCalledWith(expect.objectContaining({ id: "201" }));
+    expect(screen.getAllByTestId("item-table-row")[2]).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("selects through the imperative ref handle", () => {
+    const onSelect = vi.fn();
+    const ref = createRef<ItemTableHandle>();
+    render(
+      <ItemTable groups={groups} status={{ kind: "ready" }} storageKey="test.item-table" label="work items" onSelect={onSelect} ref={ref} />,
+    );
+
+    act(() => {
+      ref.current?.selectItem("102");
+    });
+
+    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "102" }));
+    expect(screen.getAllByTestId("item-table-row")[1]).toHaveAttribute("data-focused");
+    expect(screen.getAllByTestId("item-table-row")[1]).toHaveAttribute("aria-selected", "true");
+  });
+
   it("persists collapsed groups across remounts", () => {
     const first = renderTable();
     fireEvent.click(screen.getByRole("button", { name: /Open/ }));
@@ -158,5 +234,33 @@ describe("ItemTable", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Retry" }));
     expect(onGroupRetry).toHaveBeenCalledWith("failing");
+  });
+});
+
+describe("clampScroll", () => {
+  const ROW = 44;
+  const PADDING = 3 * ROW;
+  // A viewport of 400px shows 9 rows; padding is 132px.
+  const VIEW = 400;
+
+  it("returns null when the row is comfortably visible", () => {
+    expect(clampScroll(0, VIEW, 200, ROW, PADDING)).toBeNull();
+    expect(clampScroll(400, VIEW, 600, ROW, PADDING)).toBeNull();
+  });
+
+  it("keeps three rows below when the row sits at the bottom edge", () => {
+    // Row bottom 312 + padding wants 444 > 0 + 400.
+    expect(clampScroll(0, VIEW, 268, ROW, PADDING)).toBe(444 - VIEW);
+  });
+
+  it("keeps three rows above when the row sits above the padding line", () => {
+    // Row top 133 with scroll 300: pads to content offset 1.
+    expect(clampScroll(300, VIEW, 133, ROW, PADDING)).toBe(1);
+    // Row top 750 with scroll 500: only reachable by scrolling down to it.
+    expect(clampScroll(500, VIEW, 750, ROW, PADDING)).toBe(750 + ROW + PADDING - VIEW);
+  });
+
+  it("never returns a negative offset", () => {
+    expect(clampScroll(0, VIEW, 0, ROW, PADDING)).toBe(0);
   });
 });

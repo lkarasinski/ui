@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useRef } from "react";
 import { ItemTable } from "./item-table";
-import type { ItemGroup, TableItem, TableStatus } from "./item-table";
+import type { ItemGroup, ItemTableHandle, TableItem, TableStatus } from "./item-table";
 
 const meta: Meta<typeof ItemTable> = {
   title: "UI/ItemTable",
@@ -16,9 +17,13 @@ const meta: Meta<typeof ItemTable> = {
 The dense grouped table behind list-and-detail screens: 44px hairline rows, sticky collapsible
 group headers, and one designed state per situation — loading, error, empty, populated.
 
-\`j\`/\`k\` (or the arrow keys) move a visual focus through the visible rows and \`Enter\` selects
-the focused one. Group collapse persists through localStorage under the table's \`storageKey\`,
-so it survives reloads.
+The active row is the selected row. \`j\`/\`k\` (or the arrow keys) move it through the visible
+rows; with \`selectMode="confirm"\` (default) \`Enter\` or a click commits and fires \`onSelect\`,
+with \`"instant"\` every step commits as it passes. The scroll position follows the active row,
+keeping three rows of padding on both sides. Group collapse persists through localStorage under
+the table's \`storageKey\`, so it survives reloads.
+
+Pass a \`ref\` to drive selection from outside (\`ref.current.selectItem(id)\`).
 
 **Sources are data, not code.** A row carries an optional \`prefix\` (\`#\`, \`!\`, ...) with its
 own color class; the table never branches on where items came from.
@@ -34,8 +39,9 @@ A failed group keeps its header and shows an inline retry banner in place of its
     groups: { description: "Groups to render; empty groups are hidden.", table: { category: "Data" } },
     status: { description: "Discriminated loading / error / ready state.", table: { category: "Data" } },
     storageKey: { description: "Uniquely names this table's collapse state in localStorage.", table: { category: "Data" } },
-    selectedId: { description: "Id of the currently selected row.", table: { category: "Selection" } },
-    onSelect: { description: "Row click or Enter handler.", table: { category: "Selection" } },
+    initialSelectedId: { description: "Id of the initially selected row.", table: { category: "Selection" } },
+    selectMode: { description: 'How keyboard movement commits selection: "confirm" (default) or "instant".', table: { category: "Selection" } },
+    onSelect: { description: "Selection handler; fires on click, Enter, and every step in instant mode.", table: { category: "Selection" } },
     onGroupRetry: { description: "Retries a failed group fetch.", table: { category: "Data" } },
     label: { description: 'Accessible name of the row list, e.g. "work items".', table: { category: "Content" } },
     emptyTitle: { description: "Title of the empty state.", table: { category: "Content" } },
@@ -101,7 +107,7 @@ export const Populated: Story = {
     status: { kind: "ready" },
     storageKey: "storybook.item-table.populated",
     label: "work items",
-    selectedId: "4790",
+    initialSelectedId: "4790",
     onSelect: () => {},
   },
   render: (args) => (
@@ -109,6 +115,76 @@ export const Populated: Story = {
       <ItemTable {...args} />
     </Frame>
   ),
+};
+
+export const InstantSelection: Story = {
+  args: {
+    groups: populatedGroups,
+    status: { kind: "ready" },
+    storageKey: "storybook.item-table.instant",
+    label: "work items",
+    selectMode: "instant",
+    initialSelectedId: "4790",
+    onSelect: () => {},
+  },
+  render: (args) => (
+    <Frame>
+      <ItemTable {...args} />
+    </Frame>
+  ),
+};
+
+export const AutoScroll: Story = {
+  args: {
+    groups: [
+      {
+        id: "backlog",
+        label: "Backlog",
+        items: Array.from({ length: 40 }, (_, index) =>
+          item({ id: String(3000 + index), state: index % 5 === 4 ? "done" : "todo", title: `Backlog item ${index + 1}`, updatedAt: NOW - (index + 1) * HOUR }),
+        ),
+      },
+    ],
+    status: { kind: "ready" },
+    storageKey: "storybook.item-table.autoscroll",
+    label: "long backlog",
+    initialSelectedId: "3000",
+  },
+  render: (args) => (
+    <Frame>
+      <ItemTable {...args} />
+    </Frame>
+  ),
+};
+
+export function ExternalControlStory({ groups, storageKey }: { groups: ItemGroup[]; storageKey: string }) {
+  const tableRef = useRef<ItemTableHandle>(null);
+  return (
+    <Frame>
+      <div className="flex gap-2 border-b border-border bg-card px-3 py-2">
+        <button
+          type="button"
+          onClick={() => tableRef.current?.selectItem("4790")}
+          className="rounded border border-border px-2 py-1 text-xs hover:bg-accent"
+        >
+          Select #4790
+        </button>
+        <button
+          type="button"
+          onClick={() => tableRef.current?.selectItem("77")}
+          className="rounded border border-border px-2 py-1 text-xs hover:bg-accent"
+        >
+          Select !77
+        </button>
+      </div>
+      <ItemTable ref={tableRef} groups={groups} status={{ kind: "ready" }} storageKey={storageKey} label="work items" />
+    </Frame>
+  );
+}
+
+export const ExternalControl: Story = {
+  args: {},
+  render: () => <ExternalControlStory groups={populatedGroups} storageKey="storybook.item-table.external" />,
 };
 
 export const Loading: Story = {

@@ -1,5 +1,5 @@
 import { Alert } from "@/components/ui/alert";
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type KeyboardEvent, type Ref } from "react";
 import { TriangleAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -299,13 +299,139 @@ function SkeletonRows({ count, className }: { count: number; className?: string 
   );
 }
 
+/**
+ * How keyboard movement interacts with selection. The active row *is* the
+ * selected row; the modes differ in when a move commits.
+ */
+export type ItemTableSelectMode =
+  /** Every `j`/`k` step selects as it passes and fires `onSelect`. */
+  | "instant"
+  /** `j`/`k` moves the active highlight; Enter or click commits the selection. */
+  | "confirm";
+
+const ROW_HEIGHT = 44;
+const SCROLL_PADDING_ROWS = 3;
+
+/**
+ * Scroll offset that keeps `paddingPx` of content above *and* below the
+ * focused row. Returns null when no scrolling is needed. Exported for tests.
+ */
+export function clampScroll(scrollTop: number, viewHeight: number, rowTop: number, rowHeight: number, paddingPx: number): number | null {
+  const rowBottom = rowTop + rowHeight;
+  if (rowTop - paddingPx < scrollTop) return Math.max(0, rowTop - paddingPx);
+  if (rowBottom + paddingPx > scrollTop + viewHeight) return Math.max(0, rowBottom + paddingPx - viewHeight);
+  return null;
+}
+
+type UseItemTableNavOptions = {
+  /** Flattened visible items; movement and selection are indices into it. */
+  items: TableItem[];
+  initialId?: string;
+  mode: ItemTableSelectMode;
+  onSelect?: (item: TableItem) => void;
+};
+
+/**
+ * State for keyboard navigation and selection: one source of truth for the
+ * active (= selected) item, plus imperative controls so the component works
+ * standalone but can also be driven from outside.
+ *
+ * The visible list grows and shrinks with group collapse toggles, so the
+ * cursor is clamped by derivation rather than kept in sync.
+ */
+function useItemTableNav({ items, initialId, mode, onSelect }: UseItemTableNavOptions) {
+  const [selectedId, setSelectedId] = useState<string | undefined>(initialId);
+  const [cursorIndex, setCursorIndex] = useState(() => {
+    const index = items.findIndex((item) => item.id === initialId);
+    return index >= 0 ? index : 0;
+  });
+
+  const focusIndex = items.length === 0 ? -1 : Math.min(cursorIndex, items.length - 1);
+
+  // Mirrored into a ref so key handling never reads a stale cursor.
+  const focusRef = useRef(focusIndex);
+  focusRef.current = focusIndex;
+
+  /** Selects the item at `index`; fires `onSelect` once per commit. */
+  const commit = useCallback(
+    (index: number) => {
+      const item = items[index];
+      if (!item) return;
+      setCursorIndex(index);
+      setSelectedId(item.id);
+      onSelect?.(item);
+    },
+    [items, onSelect],
+  );
+
+  const moveTo = useCallback(
+    (index: number) => {
+      if (items.length === 0) return;
+      const next = Math.min(Math.max(index, 0), items.length - 1);
+      if (next === focusRef.current) return;
+      setCursorIndex(next);
+      if (mode === "instant") commit(next);
+    },
+    [items, mode, commit],
+  );
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (items.length === 0) return;
+      switch (event.key) {
+        case "j":
+        case "ArrowDown":
+          event.preventDefault();
+          moveTo(focusRef.current + 1);
+          break;
+        case "k":
+        case "ArrowUp":
+          event.preventDefault();
+          moveTo(focusRef.current - 1);
+          break;
+        case "Home":
+          event.preventDefault();
+          moveTo(0);
+          break;
+        case "End":
+          event.preventDefault();
+          moveTo(items.length - 1);
+          break;
+        case "Enter":
+          if (focusRef.current >= 0) commit(focusRef.current);
+          break;
+      }
+    },
+    [items, moveTo, commit],
+  );
+
+  /** Selects by id; ignores ids that are not currently visible. */
+  const selectId = useCallback(
+    (id: string) => {
+      const index = items.findIndex((item) => item.id === id);
+      if (index >= 0) commit(index);
+    },
+    [items, commit],
+  );
+
+  return { selectedId, focusIndex, handleKeyDown, selectId };
+}
+
+export type ItemTableHandle = {
+  /** Selects the item with the given id, scrolls it into view, fires `onSelect`. */
+  selectItem: (id: string) => void;
+};
+
 export type ItemTableProps = {
   /** Groups to render; empty groups are hidden. */
   groups: ItemGroup[];
   status: TableStatus;
   /** Uniquely names this table's collapse state in localStorage. */
   storageKey: string;
-  selectedId?: string;
+  /** Id of the initially selected row; selection is owned by the table afterwards. */
+  initialSelectedId?: string;
+  /** How keyboard movement commits selection. Defaults to "confirm". */
+  selectMode?: ItemTableSelectMode;
   onSelect?: (item: TableItem) => void;
   /** Retries a failed group fetch; only called when a group carries an error. */
   onGroupRetry?: (groupId: string) => void;
@@ -315,6 +441,7 @@ export type ItemTableProps = {
   emptyHint?: string;
   className?: string;
   "data-testid"?: string;
+  ref?: Ref<ItemTableHandle>;
 };
 
 function collapsedStorageKey(storageKey: string) {
@@ -337,21 +464,29 @@ function readCollapsedGroups(storageKey: string): Set<string> {
  * sticky collapsible group headers, and one designed state per situation
  * (loading, error, empty, populated).
  *
- * `j`/`k` move a visual focus through the visible rows and Enter selects the
- * focused one. Group collapse persists through localStorage under the table's
- * `storageKey`, so it survives reloads.
+ * The active row *is* the selected row. `j`/`k` (or arrows) move it through
+ * the visible rows; with `selectMode="confirm"` Enter or a click commits and
+ * fires `onSelect`, with `"instant"` every step commits as it passes. The
+ * scroll position follows the active row with three rows of padding on both
+ * sides. Home/End jump to the first/last row. Group collapse persists through
+ * localStorage under the table's `storageKey`, so it survives reloads.
+ *
+ * Pass a `ref` to drive selection from outside (`ref.current.selectItem(id)`),
+ * e.g. from a detail pane or a command palette.
  */
 export function ItemTable({
   groups,
   status,
   storageKey,
-  selectedId,
+  initialSelectedId,
+  selectMode = "confirm",
   onSelect,
   onGroupRetry,
   label,
   emptyTitle = "Nothing here",
   emptyHint,
   className,
+  ref,
   ...props
 }: ItemTableProps) {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -393,33 +528,37 @@ export function ItemTable({
     return flat;
   }, [groups, collapsed]);
 
-  const [focusedIndex, setFocusedIndex] = useState(0);
-  const focusIndexRef = useRef(0);
-  focusIndexRef.current = focusedIndex;
+  const items = useMemo(() => visibleItems.map(({ item }) => item), [visibleItems]);
+  const nav = useItemTableNav({ items, initialId: initialSelectedId, mode: selectMode, onSelect });
 
-  const clampedFocus = visibleItems.length === 0 ? -1 : Math.min(focusedIndex, visibleItems.length - 1);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (visibleItems.length === 0) return;
-    if (event.key === "j" || event.key === "ArrowDown") {
-      event.preventDefault();
-      setFocusedIndex(Math.min(focusIndexRef.current + 1, visibleItems.length - 1));
-    } else if (event.key === "k" || event.key === "ArrowUp") {
-      event.preventDefault();
-      setFocusedIndex(Math.max(focusIndexRef.current - 1, 0));
-    } else if (event.key === "Enter" && clampedFocus >= 0) {
-      onSelect?.(visibleItems[clampedFocus].item);
-    }
-  };
+  // Follow the active row: keep three rows of padding between it and the
+  // viewport edge in whichever direction it moved.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || nav.focusIndex < 0) return;
+    const row = container.querySelector<HTMLElement>("[data-focused]");
+    if (!row) return;
+    const containerRect = container.getBoundingClientRect();
+    const rowTop = row.getBoundingClientRect().top - containerRect.top + container.scrollTop;
+    const offset = clampScroll(container.scrollTop, container.clientHeight, rowTop, ROW_HEIGHT, SCROLL_PADDING_ROWS * ROW_HEIGHT);
+    if (offset !== null) container.scrollTop = offset;
+  }, [nav.focusIndex]);
+
+  // Recomputed every render on purpose: the handle must never capture a stale
+  // items list or callback.
+  useImperativeHandle(ref, () => ({ selectItem: nav.selectId }));
 
   let renderedUpTo = 0;
 
   return (
     <div
+      ref={containerRef}
       role="listbox"
       aria-label={label}
       tabIndex={0}
-      onKeyDown={handleKeyDown}
+      onKeyDown={nav.handleKeyDown}
       {...props}
       className={cn("flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain outline-none", className)}
     >
@@ -482,9 +621,9 @@ export function ItemTable({
                     <ItemRow
                       key={item.id}
                       item={item}
-                      focused={flatIndex === clampedFocus}
-                      selected={item.id === selectedId}
-                      onSelect={onSelect}
+                      focused={flatIndex === nav.focusIndex}
+                      selected={item.id === nav.selectedId}
+                      onSelect={(rowItem) => nav.selectId(rowItem.id)}
                     />
                   );
                 })}
