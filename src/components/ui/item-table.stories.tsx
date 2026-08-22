@@ -157,7 +157,7 @@ export const AutoScroll: Story = {
   ),
 };
 
-export function ExternalControlStory({ groups, storageKey }: { groups: ItemGroup[]; storageKey: string }) {
+function ExternalControlStory({ groups, storageKey }: { groups: ItemGroup[]; storageKey: string }) {
   const tableRef = useRef<ItemTableHandle>(null);
   return (
     <Frame>
