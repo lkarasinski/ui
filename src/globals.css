@@ -24,6 +24,9 @@
   --color-muted: #f1ece3;
   --color-muted-foreground: #6d655e;
 
+  --color-accent: #f1ece3;
+  --color-accent-foreground: #24201d;
+
   --color-primary: #a14c2f;
   --color-primary-hover: #b45a32;
   --color-primary-active: #8f4329;
@@ -41,6 +44,8 @@
 
   --color-warning: #b66f22;
   --color-warning-foreground: #8a5116;
+
+  --color-info: #2f6bb6;
 
   --radius-sm: 6px;
   --radius-md: 8px;

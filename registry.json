@@ -137,6 +137,16 @@
       "dependencies": ["@radix-ui/react-dialog", "lucide-react"]
     },
     {
+      "name": "health-dot",
+      "type": "registry:ui",
+      "title": "Health Dot",
+      "description": "Live connection indicator dot for an external dependency, with checking and unconfigured states.",
+      "files": [
+        { "path": "src/components/ui/health-dot.tsx", "type": "registry:ui" }
+      ],
+      "dependencies": []
+    },
+    {
       "name": "input",
       "type": "registry:ui",
       "title": "Input",
@@ -155,6 +165,16 @@
         { "path": "src/components/ui/input-otp.tsx", "type": "registry:ui" }
       ],
       "dependencies": ["input-otp"]
+    },
+    {
+      "name": "item-table",
+      "type": "registry:ui",
+      "title": "Item Table",
+      "description": "Dense grouped table with 44px rows, sticky collapsible headers, j/k keyboard navigation and loading, error and empty states.",
+      "files": [
+        { "path": "src/components/ui/item-table.tsx", "type": "registry:ui" }
+      ],
+      "dependencies": []
     },
     {
       "name": "kbd",
@@ -201,6 +221,17 @@
         { "path": "src/components/ui/radio-group.tsx", "type": "registry:ui" }
       ],
       "dependencies": ["class-variance-authority", "use-context-selector"]
+    },
+    {
+      "name": "resizable-detail-pane",
+      "type": "registry:ui",
+      "title": "Resizable Detail Pane",
+      "description": "Docked right panel of the two-pane split with drag and keyboard resizing and optional width persistence.",
+      "files": [
+        { "path": "src/components/ui/resizable-detail-pane.tsx", "type": "registry:ui" }
+      ],
+      "registryDependencies": ["app-shell"],
+      "dependencies": []
     },
     {
       "name": "separator",
@@ -260,6 +291,16 @@
         { "path": "src/components/ui/tabs.tsx", "type": "registry:ui" }
       ],
       "dependencies": ["class-variance-authority", "framer-motion", "use-context-selector"]
+    },
+    {
+      "name": "text-field",
+      "type": "registry:ui",
+      "title": "Text Field",
+      "description": "Labelled single-line input with helper text, inline error and an optional label suffix.",
+      "files": [
+        { "path": "src/components/ui/text-field.tsx", "type": "registry:ui" }
+      ],
+      "dependencies": []
     },
     {
       "name": "textarea",
