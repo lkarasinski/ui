@@ -210,12 +210,15 @@
       "name": "health-dot",
       "type": "registry:ui",
       "title": "Health Dot",
-      "description": "Live connection indicator dot for an external dependency, with checking and unconfigured states.",
+      "description": "Live connection indicator dot for an external dependency, with a hover card for status detail.",
       "files": [
         {
           "path": "src/components/ui/health-dot.tsx",
           "type": "registry:ui"
         }
+      ],
+      "registryDependencies": [
+        "hover-card"
       ],
       "dependencies": []
     },
