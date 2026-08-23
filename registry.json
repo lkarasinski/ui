@@ -14,7 +14,10 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": ["clsx", "tailwind-merge"]
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ]
     },
     {
       "name": "theme",
@@ -39,9 +42,31 @@
       "title": "Alert",
       "description": "Inline callout for user attention with composable slots.",
       "files": [
-        { "path": "src/components/ui/alert.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/alert.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority", "lucide-react", "use-context-selector"]
+      "dependencies": [
+        "class-variance-authority",
+        "lucide-react",
+        "use-context-selector"
+      ]
+    },
+    {
+      "name": "action-bar",
+      "type": "registry:ui",
+      "title": "Action Bar",
+      "description": "Floating toolbar for bulk actions on a multi-select, hidden while nothing is selected.",
+      "files": [
+        {
+          "path": "src/components/ui/action-bar.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "lucide-react"
+      ]
     },
     {
       "name": "app-shell",
@@ -49,9 +74,15 @@
       "title": "App Shell",
       "description": "Application layout shell composing a sidebar and main content area.",
       "files": [
-        { "path": "src/components/ui/app-shell.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/app-shell.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority", "use-context-selector"]
+      "dependencies": [
+        "class-variance-authority",
+        "use-context-selector"
+      ]
     },
     {
       "name": "avatar",
@@ -59,9 +90,15 @@
       "title": "Avatar",
       "description": "User avatar with image, fallback initials and size variants.",
       "files": [
-        { "path": "src/components/ui/avatar.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/avatar.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority", "use-context-selector"]
+      "dependencies": [
+        "class-variance-authority",
+        "use-context-selector"
+      ]
     },
     {
       "name": "badge",
@@ -69,9 +106,14 @@
       "title": "Badge",
       "description": "Small status label with visual variants.",
       "files": [
-        { "path": "src/components/ui/badge.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/badge.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority"]
+      "dependencies": [
+        "class-variance-authority"
+      ]
     },
     {
       "name": "button",
@@ -79,7 +121,10 @@
       "title": "Button",
       "description": "Full-width animated button with default and outline variants, icon slot and confirmation feedback.",
       "files": [
-        { "path": "src/components/ui/button.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/button.tsx",
+          "type": "registry:ui"
+        }
       ],
       "dependencies": [
         "@xstate/react",
@@ -95,9 +140,14 @@
       "title": "Card",
       "description": "Content container with header, content and footer slots.",
       "files": [
-        { "path": "src/components/ui/card.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/card.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority"]
+      "dependencies": [
+        "class-variance-authority"
+      ]
     },
     {
       "name": "checkbox",
@@ -105,9 +155,16 @@
       "title": "Checkbox",
       "description": "Checkbox control with label composition.",
       "files": [
-        { "path": "src/components/ui/checkbox.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/checkbox.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority", "lucide-react", "use-context-selector"]
+      "dependencies": [
+        "class-variance-authority",
+        "lucide-react",
+        "use-context-selector"
+      ]
     },
     {
       "name": "command",
@@ -115,9 +172,16 @@
       "title": "Command",
       "description": "Command palette built on cmdk with grouped results, keyboard hints and an animated overlay.",
       "files": [
-        { "path": "src/components/ui/command.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/command.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "registryDependencies": ["kbd", "progress", "skeleton"],
+      "registryDependencies": [
+        "kbd",
+        "progress",
+        "skeleton"
+      ],
       "dependencies": [
         "@radix-ui/react-dialog",
         "class-variance-authority",
@@ -132,9 +196,15 @@
       "title": "Dialog",
       "description": "Modal dialog built on Radix Dialog with animated overlay and content.",
       "files": [
-        { "path": "src/components/ui/dialog.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/dialog.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["@radix-ui/react-dialog", "lucide-react"]
+      "dependencies": [
+        "@radix-ui/react-dialog",
+        "lucide-react"
+      ]
     },
     {
       "name": "health-dot",
@@ -142,7 +212,10 @@
       "title": "Health Dot",
       "description": "Live connection indicator dot for an external dependency, with checking and unconfigured states.",
       "files": [
-        { "path": "src/components/ui/health-dot.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/health-dot.tsx",
+          "type": "registry:ui"
+        }
       ],
       "dependencies": []
     },
@@ -152,9 +225,16 @@
       "title": "Input",
       "description": "Text input with animated focus ring and optional adornments.",
       "files": [
-        { "path": "src/components/ui/input.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/input.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["framer-motion", "lucide-react", "use-context-selector"]
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "use-context-selector"
+      ]
     },
     {
       "name": "input-otp",
@@ -162,9 +242,14 @@
       "title": "Input OTP",
       "description": "One-time-code input built on input-otp.",
       "files": [
-        { "path": "src/components/ui/input-otp.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/input-otp.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["input-otp"]
+      "dependencies": [
+        "input-otp"
+      ]
     },
     {
       "name": "item-table",
@@ -172,7 +257,10 @@
       "title": "Item Table",
       "description": "Dense grouped table with 44px rows, sticky collapsible headers, j/k keyboard navigation and loading, error and empty states.",
       "files": [
-        { "path": "src/components/ui/item-table.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/item-table.tsx",
+          "type": "registry:ui"
+        }
       ],
       "dependencies": []
     },
@@ -182,9 +270,14 @@
       "title": "Kbd",
       "description": "Keyboard key chip with platform-aware modifier glyphs.",
       "files": [
-        { "path": "src/components/ui/kbd.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/kbd.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority"]
+      "dependencies": [
+        "class-variance-authority"
+      ]
     },
     {
       "name": "navbar",
@@ -192,7 +285,10 @@
       "title": "Navbar",
       "description": "Top navigation bar with responsive menu built on Radix Dialog.",
       "files": [
-        { "path": "src/components/ui/navbar.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/navbar.tsx",
+          "type": "registry:ui"
+        }
       ],
       "dependencies": [
         "@radix-ui/react-dialog",
@@ -208,9 +304,28 @@
       "title": "Progress",
       "description": "Determinate and indeterminate progress bar.",
       "files": [
-        { "path": "src/components/ui/progress.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/progress.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority", "use-context-selector"]
+      "dependencies": [
+        "class-variance-authority",
+        "use-context-selector"
+      ]
+    },
+    {
+      "name": "property-list",
+      "type": "registry:ui",
+      "title": "Property List",
+      "description": "Hairline label/value rows for item facts, with mono and node values.",
+      "files": [
+        {
+          "path": "src/components/ui/property-list.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": []
     },
     {
       "name": "radio-group",
@@ -218,9 +333,15 @@
       "title": "Radio Group",
       "description": "Radio option group with label composition.",
       "files": [
-        { "path": "src/components/ui/radio-group.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/radio-group.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority", "use-context-selector"]
+      "dependencies": [
+        "class-variance-authority",
+        "use-context-selector"
+      ]
     },
     {
       "name": "resizable-detail-pane",
@@ -228,9 +349,14 @@
       "title": "Resizable Detail Pane",
       "description": "Docked right panel of the two-pane split with drag and keyboard resizing and optional width persistence.",
       "files": [
-        { "path": "src/components/ui/resizable-detail-pane.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/resizable-detail-pane.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "registryDependencies": ["app-shell"],
+      "registryDependencies": [
+        "app-shell"
+      ],
       "dependencies": []
     },
     {
@@ -239,7 +365,10 @@
       "title": "Separator",
       "description": "Horizontal or vertical divider line.",
       "files": [
-        { "path": "src/components/ui/separator.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/separator.tsx",
+          "type": "registry:ui"
+        }
       ]
     },
     {
@@ -248,9 +377,17 @@
       "title": "Sidebar",
       "description": "Collapsible application sidebar with nav sections.",
       "files": [
-        { "path": "src/components/ui/sidebar.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/sidebar.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority", "framer-motion", "lucide-react", "use-context-selector"]
+      "dependencies": [
+        "class-variance-authority",
+        "framer-motion",
+        "lucide-react",
+        "use-context-selector"
+      ]
     },
     {
       "name": "skeleton",
@@ -258,9 +395,14 @@
       "title": "Skeleton",
       "description": "Loading placeholder with sheen animation.",
       "files": [
-        { "path": "src/components/ui/skeleton.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/skeleton.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority"]
+      "dependencies": [
+        "class-variance-authority"
+      ]
     },
     {
       "name": "switch",
@@ -268,9 +410,16 @@
       "title": "Switch",
       "description": "Toggle switch with label composition.",
       "files": [
-        { "path": "src/components/ui/switch.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/switch.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority", "lucide-react", "use-context-selector"]
+      "dependencies": [
+        "class-variance-authority",
+        "lucide-react",
+        "use-context-selector"
+      ]
     },
     {
       "name": "table",
@@ -278,9 +427,16 @@
       "title": "Table",
       "description": "Data table primitives with header, row and cell slots.",
       "files": [
-        { "path": "src/components/ui/table.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/table.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority", "lucide-react", "use-context-selector"]
+      "dependencies": [
+        "class-variance-authority",
+        "lucide-react",
+        "use-context-selector"
+      ]
     },
     {
       "name": "tabs",
@@ -288,9 +444,16 @@
       "title": "Tabs",
       "description": "Tab navigation with animated active indicator.",
       "files": [
-        { "path": "src/components/ui/tabs.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/tabs.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["class-variance-authority", "framer-motion", "use-context-selector"]
+      "dependencies": [
+        "class-variance-authority",
+        "framer-motion",
+        "use-context-selector"
+      ]
     },
     {
       "name": "text-field",
@@ -298,7 +461,10 @@
       "title": "Text Field",
       "description": "Labelled single-line input with helper text, inline error and an optional label suffix.",
       "files": [
-        { "path": "src/components/ui/text-field.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/text-field.tsx",
+          "type": "registry:ui"
+        }
       ],
       "dependencies": []
     },
@@ -308,9 +474,29 @@
       "title": "Textarea",
       "description": "Multi-line text input.",
       "files": [
-        { "path": "src/components/ui/textarea.tsx", "type": "registry:ui" }
+        {
+          "path": "src/components/ui/textarea.tsx",
+          "type": "registry:ui"
+        }
       ],
-      "dependencies": ["use-context-selector"]
+      "dependencies": [
+        "use-context-selector"
+      ]
+    },
+    {
+      "name": "undo-toast",
+      "type": "registry:ui",
+      "title": "Undo Toast",
+      "description": "Timed confirmation strip with one recovery action; countdown pauses under pointer or focus.",
+      "files": [
+        {
+          "path": "src/components/ui/undo-toast.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "lucide-react"
+      ]
     }
   ]
 }
