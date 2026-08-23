@@ -266,9 +266,9 @@ export function NavbarActions({ children, className }: { children: ReactNode; cl
   return <div className={cn("ml-auto flex min-w-0 items-center gap-1 sm:gap-1.5", className)}>{children}</div>;
 }
 
-export function NavbarIconButton({ label, icon: Icon, className, ...props }: ComponentProps<"button"> & { label: string; icon: LucideIcon }) {
+export function NavbarIconButton({ label, icon: Icon, className, iconClassName, ...props }: ComponentProps<"button"> & { label: string; icon: LucideIcon; iconClassName?: string }) {
   // 40px on touch, 36px once there is a pointer and the row is tighter.
-  return <button type="button" aria-label={label} className={cn("inline-flex size-10 shrink-0 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-primary/25 sm:size-9", className)} {...props}><Icon aria-hidden="true" className="size-4" strokeWidth={1.8} /></button>;
+  return <button type="button" aria-label={label} className={cn("inline-flex size-10 shrink-0 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-primary/25 sm:size-9", className)} {...props}><Icon aria-hidden="true" className={cn("size-4", iconClassName)} strokeWidth={1.8} /></button>;
 }
 
 /**
