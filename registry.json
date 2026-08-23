@@ -378,6 +378,19 @@
       "dependencies": []
     },
     {
+      "name": "row-context-menu",
+      "type": "registry:ui",
+      "title": "Row Context Menu",
+      "description": "Right-click menu for a table or list row, portalled to the body and clamped on screen.",
+      "files": [
+        {
+          "path": "src/components/ui/row-context-menu.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": []
+    },
+    {
       "name": "separator",
       "type": "registry:ui",
       "title": "Separator",
