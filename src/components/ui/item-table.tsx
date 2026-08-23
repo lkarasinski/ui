@@ -2,6 +2,7 @@ import { Alert } from "@/components/ui/alert";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type KeyboardEvent, type Ref } from "react";
 import { TriangleAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RowContextMenu, type RowMenuItem } from "@/components/ui/row-context-menu";
 
 /**
  * Normalized lifecycle states. The icons follow the Linear convention:
@@ -18,6 +19,15 @@ export type ItemPrefix = {
   className?: string;
 };
 
+/** A secondary item hanging off a row, shown as a compact glyph chip after the title. */
+export type ItemAttachment = {
+  /** Id rendered after the attachment's prefix glyph (`45`). */
+  id: string;
+  /** Where the attachment came from; named in its tooltip when set. */
+  source?: string;
+  prefix?: ItemPrefix;
+};
+
 export type TableItem = {
   /** Source-native id, rendered after the prefix glyph (`#123`, `!45`). */
   id: string;
@@ -30,6 +40,8 @@ export type TableItem = {
   tags: string[];
   /** Optional colored prefix glyph shown before the id. */
   prefix?: ItemPrefix;
+  /** Secondary items hanging off this row, e.g. the merge requests of an issue. */
+  attachments?: ItemAttachment[];
 };
 
 export type ItemGroup = {
@@ -137,6 +149,7 @@ export type ItemRowProps = {
   selected: boolean;
   now?: number;
   onSelect?: (item: TableItem) => void;
+  onContextMenu?: (item: TableItem, position: { x: number; y: number }) => void;
 };
 
 /**
@@ -144,7 +157,7 @@ export type ItemRowProps = {
  * prefix, truncated title, flags, and right-aligned meta. Hairline divider,
  * no zebra.
  */
-export function ItemRow({ item, focused, selected, now, onSelect }: ItemRowProps) {
+export function ItemRow({ item, focused, selected, now, onSelect, onContextMenu }: ItemRowProps) {
   return (
     <div
       role="option"
@@ -153,6 +166,14 @@ export function ItemRow({ item, focused, selected, now, onSelect }: ItemRowProps
       data-focused={focused || undefined}
       tabIndex={-1}
       onClick={() => onSelect?.(item)}
+      onContextMenu={
+        onContextMenu
+          ? (event) => {
+              event.preventDefault();
+              onContextMenu(item, { x: event.clientX, y: event.clientY });
+            }
+          : undefined
+      }
       className="group/row relative flex h-11 shrink-0 cursor-default items-center border-b border-border/60 px-3 text-sm outline-none"
     >
       {/* Fill layers paint bottom to top: focus, selection, hover. Each is
@@ -174,6 +195,20 @@ export function ItemRow({ item, focused, selected, now, onSelect }: ItemRowProps
           <span className="text-muted-foreground">{item.id}</span>
         </span>
         <span className="min-w-0 flex-1 truncate text-foreground">{item.title}</span>
+        {(item.attachments ?? []).map((attachment) => (
+          <span
+            key={attachment.id}
+            title={`Attached: ${attachment.prefix?.glyph ?? ""}${attachment.id}${attachment.source ? ` (${attachment.source})` : ""}`}
+            className="flex shrink-0 items-center rounded bg-secondary px-1.5 py-px font-mono text-[10px] leading-[14px]"
+          >
+            {attachment.prefix && (
+              <span aria-hidden="true" className={attachment.prefix.className}>
+                {attachment.prefix.glyph}
+              </span>
+            )}
+            <span className="text-muted-foreground">{attachment.id}</span>
+          </span>
+        ))}
         {item.flags.map((flag) => (
           <span key={flag} className={cn("shrink-0 rounded border px-1.5 py-px text-[10px] font-medium leading-[14px]", FLAG_CLASS[flag])}>
             {FLAG_LABEL[flag]}
@@ -337,14 +372,48 @@ type UseItemTableNavOptions = {
  * standalone but can also be driven from outside.
  *
  * The visible list grows and shrinks with group collapse toggles, so the
- * cursor is clamped by derivation rather than kept in sync.
+ * cursor is clamped by derivation rather than kept in sync. Live refetches
+ * replace `items` wholesale; the reconcile step below (a render-phase
+ * adjustment, not an effect) keeps selection pinned to item identity so
+ * updates never yank the cursor. Exported for tests.
  */
-function useItemTableNav({ items, initialId, mode, onSelect }: UseItemTableNavOptions) {
+export function useItemTableNav({ items, initialId, mode, onSelect }: UseItemTableNavOptions) {
   const [selectedId, setSelectedId] = useState<string | undefined>(initialId);
   const [cursorIndex, setCursorIndex] = useState(() => {
     const index = items.findIndex((item) => item.id === initialId);
     return index >= 0 ? index : 0;
   });
+
+  // Reconcile whenever the caller passes a new items array (refetch, filter,
+  // collapse): follows the selected id to its new position, falls back to
+  // the nearest remaining row when it vanished, and auto-selects the first
+  // row once data arrives in instant mode. Runs during render on purpose —
+  // it is pure derived-state bookkeeping and converges after one pass.
+  const [lastItems, setLastItems] = useState(items);
+  if (lastItems !== items) {
+    setLastItems(items);
+    if (items.length > 0) {
+      const currentId = selectedId;
+      if (currentId === undefined) {
+        if (mode === "instant") {
+          setCursorIndex(0);
+          setSelectedId(items[0].id);
+        }
+      } else {
+        const index = items.findIndex((item) => item.id === currentId);
+        if (index >= 0) {
+          // Instant mode treats selection and cursor as one thing, so the
+          // cursor rides along; confirm mode keeps the browsing position.
+          if (mode === "instant" && cursorIndex !== index) setCursorIndex(index);
+        } else {
+          // Selected item vanished between refetches: anchor at its old position.
+          const anchor = Math.min(Math.max(cursorIndex, 0), items.length - 1);
+          setCursorIndex(anchor);
+          setSelectedId(items[anchor].id);
+        }
+      }
+    }
+  }
 
   const focusIndex = items.length === 0 ? -1 : Math.min(cursorIndex, items.length - 1);
 
@@ -435,6 +504,8 @@ export type ItemTableProps = {
   onSelect?: (item: TableItem) => void;
   /** Retries a failed group fetch; only called when a group carries an error. */
   onGroupRetry?: (groupId: string) => void;
+  /** Entries for a row's right-click menu; a row without entries opens nothing. */
+  rowMenuItems?: (item: TableItem) => RowMenuItem[];
   /** Accessible name of the row list, e.g. "work items". */
   label: string;
   emptyTitle?: string;
@@ -482,6 +553,7 @@ export function ItemTable({
   selectMode = "confirm",
   onSelect,
   onGroupRetry,
+  rowMenuItems,
   label,
   emptyTitle = "Nothing here",
   emptyHint,
@@ -532,6 +604,7 @@ export function ItemTable({
   const nav = useItemTableNav({ items, initialId: initialSelectedId, mode: selectMode, onSelect });
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const [rowMenu, setRowMenu] = useState<{ item: TableItem; x: number; y: number } | null>(null);
 
   // Follow the active row: keep three rows of padding between it and the
   // viewport edge in whichever direction it moved.
@@ -624,6 +697,16 @@ export function ItemTable({
                       focused={flatIndex === nav.focusIndex}
                       selected={item.id === nav.selectedId}
                       onSelect={(rowItem) => nav.selectId(rowItem.id)}
+                      onContextMenu={
+                        rowMenuItems
+                          ? (rowItem, position) => {
+                              // A row without menu entries must not flash an
+                              // empty menu shell.
+                              if (rowMenuItems(rowItem).length === 0) return;
+                              setRowMenu({ item: rowItem, ...position });
+                            }
+                          : undefined
+                      }
                     />
                   );
                 })}
@@ -635,6 +718,15 @@ export function ItemTable({
         <EmptyState
           title={emptyTitle}
           hint={emptyHint ?? (groups.some((group) => group.items.length > 0) ? "Every group is collapsed." : undefined)}
+        />
+      )}
+
+      {rowMenu && rowMenuItems && (
+        <RowContextMenu
+          label={rowMenu.item.title}
+          items={rowMenuItems(rowMenu.item)}
+          position={rowMenu}
+          onClose={() => setRowMenu(null)}
         />
       )}
     </div>

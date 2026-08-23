@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ItemTable } from "./item-table";
 import type { ItemGroup, ItemTableHandle, TableItem, TableStatus } from "./item-table";
 
@@ -23,10 +23,15 @@ with \`"instant"\` every step commits as it passes. The scroll position follows 
 keeping three rows of padding on both sides. Group collapse persists through localStorage under
 the table's \`storageKey\`, so it survives reloads.
 
-Pass a \`ref\` to drive selection from outside (\`ref.current.selectItem(id)\`).
+Pass a \`ref\` to drive selection from outside (\`ref.current.selectItem(id)\`). Selection is
+pinned to the row's id, so a refetch that reorders or drops rows never yanks the cursor: the
+selected row keeps its selection at its new position, and when it disappears the row that took
+its place is selected instead.
 
 **Sources are data, not code.** A row carries an optional \`prefix\` (\`#\`, \`!\`, ...) with its
-own color class; the table never branches on where items came from.
+own color class; the table never branches on where items came from. \`attachments\` hang
+secondary items off a row as glyph chips after the title, and \`rowMenuItems\` gives a row a
+right-click menu — return an empty array for rows that have no actions.
 
 Rows render from \`groups\` only while \`status\` is \`ready\`. A table-level failure dims four
 skeleton rows to hold the layout and floats a warning alert with a retry action over their middle.
@@ -43,6 +48,7 @@ A failed group keeps its header and shows an inline retry banner in place of its
     selectMode: { description: 'How keyboard movement commits selection: "confirm" (default) or "instant".', table: { category: "Selection" } },
     onSelect: { description: "Selection handler; fires on click, Enter, and every step in instant mode.", table: { category: "Selection" } },
     onGroupRetry: { description: "Retries a failed group fetch.", table: { category: "Data" } },
+    rowMenuItems: { description: "Entries for a row's right-click menu; a row without entries opens nothing.", table: { category: "Row actions" } },
     label: { description: 'Accessible name of the row list, e.g. "work items".', table: { category: "Content" } },
     emptyTitle: { description: "Title of the empty state.", table: { category: "Content" } },
     emptyHint: { description: "Hint line of the empty state; defaults to a note when every group is collapsed.", table: { category: "Content" } },
@@ -185,6 +191,113 @@ function ExternalControlStory({ groups, storageKey }: { groups: ItemGroup[]; sto
 export const ExternalControl: Story = {
   args: {},
   render: () => <ExternalControlStory groups={populatedGroups} storageKey="storybook.item-table.external" />,
+};
+
+export const Attachments: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: "Secondary items — the merge requests of an issue, the runs of a job — as mono chips after the title.",
+      },
+    },
+  },
+  args: {
+    groups: [
+      {
+        id: "needs-my-action",
+        label: "Needs my action",
+        items: [
+          item({ id: "4821", prefix: issue, state: "in-progress", flags: ["needs-my-action"], title: "Review access request for the reporting workspace", projectName: "Platform", updatedAt: NOW - 12 * 60_000, attachments: [{ id: "913", source: "gitlab", prefix: request }] }),
+          item({ id: "4790", prefix: issue, state: "in-progress", title: "Split the export job into per-project chunks", projectName: "Platform", updatedAt: NOW - 5 * HOUR, attachments: [{ id: "77", source: "gitlab", prefix: request }, { id: "78", source: "gitlab", prefix: request }] }),
+          item({ id: "4802", prefix: issue, title: "Audit log retention is counted in wall days", projectName: "Platform", updatedAt: NOW - 26 * HOUR }),
+        ],
+      },
+    ],
+    status: { kind: "ready" },
+    storageKey: "storybook.item-table.attachments",
+    label: "work items",
+  },
+  render: (args) => (
+    <Frame>
+      <ItemTable {...args} />
+    </Frame>
+  ),
+};
+
+function ContextMenuStory() {
+  const [log, setLog] = useState("Right-click a row.");
+  return (
+    <Frame>
+      <ItemTable
+        groups={populatedGroups}
+        status={{ kind: "ready" }}
+        storageKey="storybook.item-table.context-menu"
+        label="work items"
+        rowMenuItems={(row) =>
+          row.state === "done"
+            ? []
+            : [
+                { label: "Open", onSelect: () => setLog(`Opened ${row.id}`) },
+                { label: "Snooze", onSelect: () => setLog(`Snoozed ${row.id}`) },
+                { label: "Dismiss", destructive: true, onSelect: () => setLog(`Dismissed ${row.id}`) },
+              ]
+        }
+      />
+      <p className="border-t border-border bg-card px-3 py-2 text-[12px] text-muted-foreground">{log}</p>
+    </Frame>
+  );
+}
+
+export const ContextMenu: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: "Rows in the Done group return no entries, so right-clicking them opens nothing.",
+      },
+    },
+  },
+  args: {},
+  render: () => <ContextMenuStory />,
+};
+
+function LiveUpdatesStory() {
+  const [groups, setGroups] = useState(populatedGroups);
+
+  // Stands in for a poll: every two seconds the source returns the same rows
+  // in a different order, the way a "recently updated" sort would.
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setGroups((previous) =>
+        previous.map((group) => ({ ...group, items: [...group.items.slice(1), group.items[0]] })),
+      );
+    }, 2000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return (
+    <Frame>
+      <ItemTable
+        groups={groups}
+        status={{ kind: "ready" }}
+        storageKey="storybook.item-table.live"
+        label="work items"
+        selectMode="instant"
+        initialSelectedId="4790"
+      />
+    </Frame>
+  );
+}
+
+export const LiveUpdates: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: "Rows reorder every two seconds; the selection stays on the row it was on, not on the position.",
+      },
+    },
+  },
+  args: {},
+  render: () => <LiveUpdatesStory />,
 };
 
 export const Loading: Story = {

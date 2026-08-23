@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { createRef } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -220,6 +220,60 @@ describe("ItemTable", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Retry" }));
     expect(onRetry).toHaveBeenCalledOnce();
+  });
+
+  it("renders attachment chips after the row title", () => {
+    renderTable({
+      groups: [
+        {
+          id: "open",
+          label: "Open",
+          items: [
+            {
+              id: "4821",
+              state: "todo",
+              flags: [],
+              title: "Issue row",
+              updatedAt: NOW,
+              tags: [],
+              attachments: [
+                { id: "913", source: "gitlab", prefix: { glyph: "!", className: "text-primary" } },
+                { id: "914" },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const row = screen.getByTestId("item-table-row");
+    expect(row.textContent).toContain("913");
+    expect(row.textContent).toContain("914");
+    expect(screen.getByTitle("Attached: !913 (gitlab)")).toBeInTheDocument();
+    expect(screen.getByTitle("Attached: 914")).toBeInTheDocument();
+  });
+
+  it("opens a row context menu and runs the chosen entry", () => {
+    const onSnooze = vi.fn();
+    renderTable({ rowMenuItems: () => [{ label: "Snooze", onSelect: onSnooze }] });
+
+    fireEvent.contextMenu(screen.getAllByTestId("item-table-row")[0]);
+
+    const menu = screen.getByRole("menu", { name: "Actions for Item 101" });
+    fireEvent.click(within(menu).getByRole("menuitem", { name: "Snooze" }));
+
+    expect(onSnooze).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+
+  it("opens nothing for a row without menu entries", () => {
+    renderTable({ rowMenuItems: (item) => (item.id === "101" ? [{ label: "Snooze", onSelect: vi.fn() }] : []) });
+
+    fireEvent.contextMenu(screen.getAllByTestId("item-table-row")[1]);
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+
+    fireEvent.contextMenu(screen.getAllByTestId("item-table-row")[0]);
+    expect(screen.getByRole("menu")).toBeInTheDocument();
   });
 
   it("shows an inline banner inside the failed group with a group-scoped retry", () => {

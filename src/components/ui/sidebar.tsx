@@ -43,6 +43,8 @@ function useSidebar<T>(selector: (context: SidebarContextValue) => T) {
   return useContextSelector(SidebarStateContext, (context) => (context ? selector(context) : (undefined as T)));
 }
 
+export { useSidebar };
+
 export type SidebarRootProps = ComponentProps<"aside"> & {
   activeKey?: string;
   collapsed?: boolean;
