@@ -273,12 +273,16 @@
       "name": "item-table",
       "type": "registry:ui",
       "title": "Item Table",
-      "description": "Dense grouped table with 44px rows, sticky collapsible headers, j/k keyboard navigation and loading, error and empty states.",
+      "description": "Dense grouped table with 44px rows, sticky collapsible headers, j/k keyboard navigation, row context menus and loading, error and empty states.",
       "files": [
         {
           "path": "src/components/ui/item-table.tsx",
           "type": "registry:ui"
         }
+      ],
+      "registryDependencies": [
+        "alert",
+        "row-context-menu"
       ],
       "dependencies": []
     },
