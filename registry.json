@@ -220,6 +220,21 @@
       "dependencies": []
     },
     {
+      "name": "hover-card",
+      "type": "registry:ui",
+      "title": "Hover Card",
+      "description": "Compact card opened by hover or keyboard focus, portalled so overflow never clips it.",
+      "files": [
+        {
+          "path": "src/components/ui/hover-card.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "@radix-ui/react-hover-card"
+      ]
+    },
+    {
       "name": "input",
       "type": "registry:ui",
       "title": "Input",
