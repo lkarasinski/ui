@@ -28,6 +28,7 @@
     "lucide-react": "^1.32.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-markdown": "^10.1.0",
     "tailwind-merge": "^3.6.0",
     "tiptap-markdown": "^0.9.0",
     "use-context-selector": "^2.0.0",

@@ -302,6 +302,21 @@
       ]
     },
     {
+      "name": "markdown",
+      "type": "registry:ui",
+      "title": "Markdown",
+      "description": "Read-only markdown renderer for untrusted text; raw HTML is escaped and links open in a new tab.",
+      "files": [
+        {
+          "path": "src/components/ui/markdown.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "react-markdown"
+      ]
+    },
+    {
       "name": "navbar",
       "type": "registry:ui",
       "title": "Navbar",
