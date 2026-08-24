@@ -11,9 +11,10 @@ leaf widgets.
 
 ## Components
 
-alert · app-shell · avatar · badge · button · card · checkbox · command ·
-dialog · input · input-otp · kbd · navbar · progress · radio-group ·
-separator · sidebar · skeleton · switch · table · tabs · textarea
+alert · app-shell · avatar · badge · button · calendar · calendar-input ·
+card · checkbox · command · dialog · input · input-otp · kbd · navbar ·
+progress · radio-group · separator · sidebar · skeleton · switch · table ·
+tabs · textarea
 
 Browse them live in Storybook (see [Development](#development)).
 
