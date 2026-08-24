@@ -135,6 +135,41 @@
       ]
     },
     {
+      "name": "calendar",
+      "type": "registry:ui",
+      "title": "Calendar",
+      "description": "Month grid for picking single dates or a from-to range in one calendar, with keyboard navigation and disabled-date rules.",
+      "files": [
+        {
+          "path": "src/components/ui/calendar.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "lucide-react",
+        "use-context-selector"
+      ]
+    },
+    {
+      "name": "calendar-input",
+      "type": "registry:ui",
+      "title": "Calendar Input",
+      "description": "Date field whose trigger opens the calendar in a popover; single or range mode, clearable, form-ready.",
+      "files": [
+        {
+          "path": "src/components/ui/calendar-input.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "registryDependencies": [
+        "calendar"
+      ],
+      "dependencies": [
+        "@radix-ui/react-popover",
+        "lucide-react"
+      ]
+    },
+    {
       "name": "card",
       "type": "registry:ui",
       "title": "Card",
